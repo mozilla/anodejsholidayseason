@@ -17,7 +17,7 @@ serious server platform.
 
 What if you have half a second of computation work that you need to
 do?  If you do this work on the main javascript evaluation thread, it
-means that for an excrutiating half a second that is *all* you are doing:
+means that for an excruciating half a second that is *all* you are doing:
 No other application javascript can run, no request handling, no joy!
 
 How can all of this be true and the author *still* posit that NodeJS
@@ -40,7 +40,7 @@ that motivated this post, was in building a server in NodeJS that
 could handle a large number of requests with mixed characteristics.
 "Interactive" requests have low computational cost to execute and need
 to get done fast to keep the UI feeling responsive, while "Batch"
-opertaions require between 100ms and 500ms of processor time and can
+operations require between 100ms and 500ms of processor time and can
 be delayed a bit longer without making the user sad.
 
 We matched this mix of requests with our desires for how the application
@@ -48,12 +48,12 @@ should work, and came up with four key requirements of a solution:
 
   * **saturation**: The solution will use every available processor
      under load.
-  * **responsiveness**: Even under maximal load, our applicatons UI
+  * **responsiveness**: Even under maximal load, our applications UI
      should remain responsive.
   * **grace**: We expect the unexpected: at some point be we will be
      overwhelmed with more traffic than we can handle.  At this time
      we should serve as many users as we can, with an excellent user
-     experience, while displaying a fast clear error to the remainter.
+     experience, while displaying a fast clear error to the remainder.
   * **simplicity**: When we deploy this solution, we should not have
      to buy new software, stand up new servers.  It should be simple
      to incrementally integrate into the service into areas of code
@@ -127,7 +127,7 @@ resources!  If you perform the same test on a 24 core processor, you
 won't be as happy: you will see four cores fully utilized while the
 rest sit idle.  The problem here is that the library is using NodeJS's
 internal threadpool for a problem that it was not designed for, and this
-threadpool has (at the time of writing) a hardcoded upper bound of 4.
+threadpool has a hardcoded upper bound of 4 [footnote 2].
 
 A more fundamental problem with this approach is that because you
 are now flooding NodeJS's internal threadpool, you will starve
@@ -214,12 +214,12 @@ into an existing project easy.
 ### The Question of *Grace*
 
 Compute cluster manages a bit more than just process spawning and message
-passing.  It knows how much work is running, and knows emperically how
+passing.  It knows how much work is running, and knows empirically how
 long work takes to finish on average.  These bits allow us to reliably
 predict how long a new bit of work will take to finish.
 
 When we combine this knowledge with a client supplied parameter,
-`max_request_time`, it becomes possible to pre-emptively fail on requests
+`max_request_time`, it becomes possible to preemptively fail on requests
 that are likely to take longer than allowable.  
 
 This feature let's you easily map a user experience requirement into
@@ -228,12 +228,12 @@ in a `max_request_time` of about 7 seconds (with padding for network time).
 
 In load testing the persona service, the results so far are promising.
 Under times of extreme load we are able allow authenticated users to
-continue to use the service, and block a portion of unathenticated users right
+continue to use the service, and block a portion of unauthenticated users right
 up front.
 
 ## Next Steps
 
-Application level paralellization using processes works well for a
+Application level parallelization using processes works well for a
 single tier deployment architecture - An arrangement where you have
 only one type of node and simple add more to support scale.  As applications
 get more complex however, it is likely the deployment architecture
@@ -250,9 +250,9 @@ Multiple tiers in multiple colos changes the parameters of the scaling problem
 considerably while the goals remain the same.
 
 The future of `compute-cluster` may involve the ability to distribute work
-over multiple different tiers to maximally saturate availalbe computation
-resources under times of load.  This may work cross-colo to support
-geographically assymetric bursts.  This may involve the ability to leverage
+over multiple different tiers to maximally saturate available computation
+resources in times of load.  This may work cross-colo to support
+geographically asymmetric bursts.  This may involve the ability to leverage
 new hardware that's demand spun at some trusted cloud compute provider.
 Or we may solve the problem a different way.
 
@@ -266,7 +266,8 @@ you can learn more about current scaling challenges and approaches in Persona on
 [footnote 1] bcrypt does this by leveraging the same threadpool that
 NodeJS itself uses to internally parallelize requests.  This calls
 out that when I said "NodeJS runs almost completely on one processor"
-I was over-simplifying.  As of 0.8.x node's internal paralellization allows
+I was over-simplifying.  As of 0.8.x node's internal parallelization allows
 single threaded application code to run at 150% to 200% processor usage
 by implementing concurrency at a low level that the application remains
 blissfully ignorant of.
+[footnote 2] XXX say more about this upper bound
