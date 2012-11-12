@@ -1,173 +1,102 @@
 ## Fully Loaded Node
 
-> Episode 2 in the *A Node.JS Holiday Season* series from Mozilla's Identity
-> team searches for an optimal server application architecture for computation
-> heavy workloads.
+> Episode 2 in the *A Node.JS Holiday Season* series from Mozilla's Identity team searches for an optimal server application architecture for computation heavy workloads.
 >
-> This is a prose version of a short talk given by
-> [Lloyd Hilaiel at Node Philly 2012][] with the same title.
+> This is a prose version of a short talk given by [Lloyd Hilaiel at Node Philly 2012][] with the same title.
 
   [Lloyd Hilaiel at Node Philly 2012]: http://www.youtube.com/watch?v=U0hNgO5hrtc
 
-A common moment of discomfort when you first meet NodeJS is when you
-learn that you don't have threads.  A single NodeJS program runs
-almost completely on one processor.  Crazy, right?  Some people, upon
-discovering this limitation, conclude that NodeJS simply isn't a
-serious server platform.
+There was time, not too long ago, when having multiple processing cores within a single CPU was not an option: in order to build a parallel workstation you needed an expensive motherboard that supported multiple CPUs.  These boards were decidedly not for everyday consumers.  Much of the software available, including OS kernels and drivers, were not optimized for multiple processors.  The reward for a technolust to deploy multiple cores in data centers or as workstations was often rewarded with unstable systems and diminishing returns.  *Those days are gone.*  Today we reliably run at least two cores on our desktops, in our laptops, and on our smart phones.  Spinning up a 12 core machine in the cloud is commonplace.   We live in a multiprocessing world, and we're not turning back - our software must adapt.
 
-What if you have half a second of computation work that you need to
-do?  If you do this work on the main javascript evaluation thread, it
-means that for an excruciating half a second that is *all* you are doing:
-No other application javascript can run, no request handling, no joy!
+Given this trend, the frenzy around Node.JS as an emergent server software platform may seem initially ironic.  With Node.JS, all of your application code runs on a single processor.  The word *thread* is not present in the current stable Node.JS API and there are no synchronization primitives.  It turns out that this was not an oversight in the design of Node.JS.  There are many ways to build a service that leverages all processing cores available.  Approaches range from internal threading in libraries you use, to spawning multiple processes either manually, or managed by software, or by your Node.JS applications themselves.
 
-How can all of this be true and the author *still* posit that NodeJS
-turns out to be a fantastic environment for computationally intensive
-applications that need to leverage servers with tens of processing
-cores?  Because we don't need no threads!  We've got processes which
-give you full memory isolation, fail gracefully, start fast, sit in a
-relatively piddling little pool of memory - they give you all the
-benefits of threading without the angst.
-
-If you spend ten more minutes with me, I'll explain an application
-architecture that rocks for compute heavy workloads, and present
-a teensy tinsy library that makes that architecture
-easy to realize.  We shall let no processor go underutilized.
-
+This post will explore the various high level approaches available to building Node.JS servers that run extra hot. We will present the [compute-cluster][] module, which is a small Node.JS library that makes it easy to manage a collection of processes which distribute computation across multiple processors.
+  
 ## The Problem
 
-The specific problem that we faced in [Mozilla Persona][], the service
-that motivated this post, was in building a server in NodeJS that
-could handle a large number of requests with mixed characteristics.
-"Interactive" requests have low computational cost to execute and need
-to get done fast to keep the UI feeling responsive, while "Batch"
-operations require between 100ms and 500ms of processor time and can
-be delayed a bit longer without making the user sad.
+We choose Node.JS for [Mozilla Persona][], where we built a server that could handle a large number of requests with mixed characteristics.  Our "Interactive" requests have low computational cost to execute and need to get done fast to keep the UI feeling responsive, while "Batch" operations require about 500ms of processor time and can be delayed a bit longer without making the user sad.
 
-We matched this mix of requests with our desires for how the application
-should work, and came up with four key requirements of a solution:
+  [Mozilla Persona]: https://persona.org
 
-  * **saturation**: The solution will use every available processor
-     under load.
-  * **responsiveness**: Even under maximal load, our applications UI
-     should remain responsive.
-  * **grace**: We expect the unexpected: at some point be we will be
-     overwhelmed with more traffic than we can handle.  At this time
-     we should serve as many users as we can, with an excellent user
-     experience, while displaying a fast clear error to the remainder.
-  * **simplicity**: When we deploy this solution, we should not have
-     to buy new software, stand up new servers.  It should be simple
-     to incrementally integrate into the service into areas of code
-     that are CPU intensive.
+To find a great application design, we matched this mix of requests with our desires for how things should work, and came up with four key requirements:
 
-Armed with these requirements, we can meaningfully contrast a couple
-different approaches.
+  * **saturation**: The solution will be able to use every available processor.
+  * **responsiveness**: Our application's UI should remain responsive.  Always.
+  * **grace**: When overwhelmed with more traffic than we can handle, we should serve as many users as we can, and display a clear error to the remainder.
+  * **simplicity**: The solution should easy to incrementally integrate into an existing server.
 
-## There Is More Than One Way To Do It
+Armed with this, we can meaningfully contrast several different approaches:
 
-While there are an unbounded number of ways to solve this problem,
-let's distill out the key approaches and examine each briefly.
+### Approach 1: Just do it on the main thread.
 
-### Just do it on the main thread.
-
-If we simply perform computation work on the main thread, the solution
-falls down fast.  You cannot *saturate* multiple computation cores,
-you cannot be *responsive* nor *graceful* with repeated half second
-starvation of interactive requests, though this approach is certainly
-simple:
+If we simply perform computation work on the main thread, the results are terrible.  You cannot *saturate* multiple computation cores, and you cannot be *responsive* nor *graceful* with repeated half second starvation of interactive requests.  The only thing this approach has going for it is *simplicity*:
 
     function myRequestHandler(request, response) [
-      // here we'll bring everything to a grinding halt for
-      // a half second.
+      // Let's bring everything to a grinding halt for half a second.
       var results = doComputationWorkSync(request.somesuch);
     }
 
 **tl;dr;**: Synchronous computation is bad.
 
-### Do it Asynchronously.
+### Approach 2: Do it Asynchronously.
 
-We can improve this implementation by using asynchronous functions
-that run in the *background*, right?  Well, kind of.  It depends on 
-what precisely the *background* means.  If your computation function
-is implemented in such a way that it actually performs computation
-in javascript or Native code on the main thread, then you actually
-are doing no better than a synchronous approach:  
+We can improve this implementation by using asynchronous functions that run in the *background*, right?  Well, kind of.  It depends on what precisely the *background* means.  If your computation function is implemented in such a way that it actually performs computation in javascript or Native code on the main thread, then you are doing no better than with a synchronous approach:  
 
     function doComputationWork(input, callback) {
-      // Because here the internal implementation of an asynchronous
+      // Because the internal implementation of this asynchronous
       // function is itself synchronously run on the main thread,
       // you still starve the entire process.
-      var output = processInputForHalfASecond(input);
+      var output = doComputationWorkSync(input);
       process.nextTick(function() {
-        callback(output);
+        callback(null, output);
       });
     }
 
     function myRequestHandler(request, response) [
-      // here we'll bring everything to a grinding halt for
-      // a half second.
-      var results = doComputationWorkSync(request.somesuch);
+      // Even though this *looks* better, we're still bringing everything 
+      // to a grinding halt.
+      doComputationWork(request.somesuch, function(err, results) {
+        // … do something with results ...
+      });
     }
 
-**tl;dr;** Asynchronous in NodeJS does not imply that work is run
-in "the background" or is somehow innately parallelizable.
+**tl;dr;** An asynchronous API in NodeJS does not imply that work is run on a different processor.
 
-### So Do it Asynchronously with Carefully Written Libraries!
+### Approach 3: Do it Asynchronously with Threaded Libraries!
 
-If you have a library that is written in native code and cleverly
-implemented, you can actually execute the costly function in different
-threads from within NodeJS [footnote 1].  Many examples exist, one
-being the excellent [bcrypt library][] from [Nick Campbell[].
+If you have a library that is written in native code and cleverly implemented, you can actually execute the costly work in different threads from within NodeJS.  Many examples exist, one being the excellent [bcrypt library][] from [Nick Campbell[].
 
   [bcrypt library]: http://github.com/ncb000gt/node.bcrypt.js
   [Nick Campbell]: http://github.com/ncb000gt
 
-If you test this out on a four core machine, what you will see will
-look fantastic!  Four times the throughput, leveraging all computation
-resources!  If you perform the same test on a 24 core processor, you
-won't be as happy: you will see four cores fully utilized while the
-rest sit idle.  The problem here is that the library is using NodeJS's
-internal threadpool for a problem that it was not designed for, and this
-threadpool has a hardcoded upper bound of 4 [footnote 2].
+If you test this out on a four core machine, what you will see will look fantastic!  Four times the throughput, leveraging all computation resources!  If you perform the same test on a 24 core processor, you won't be as happy: you will see four cores fully utilized while the
+rest sit idle.  The problem here is that the library is using NodeJS's internal threadpool for a problem that it was not designed for, and this threadpool has a [hardcoded upper bound of 4][].
 
-A more fundamental problem with this approach is that because you
-are now flooding NodeJS's internal threadpool, you will starve
-other work that runs on it.  This can include things like network or
-file IO.  
+  [hardcoded upper bound of 4]: https://github.com/joyent/node/blob/e2bcff9aa75e51b9ba071330fe712180abed03e0/deps/uv/src/unix/threadpool.c#L31
 
-Libraries that are "internally threaded" in this manner both fail to
-**saturate** multiple cores and adversely affect **responsiveness** under
-load.
+A more fundamental problem with this approach (which partially explains why upping this limit is a bad idea) is because we are now flooding NodeJS's internal threadpool, we will starve other work that runs on it.  This can include things like network or file IO.  
 
-**tl;dr;** Don't use library features that claim to be
-"internally threaded" to parallelize compute work.
+Libraries that are "internally threaded" in this manner both fail to **saturate** multiple cores and adversely affect **responsiveness** under load.
+
+**tl;dr;** Don't use library features that claim to be "internally threaded" to parallelize compute work.
 
 ### Use node's cluster module!
 
-NodeJS 0.6.x and up offers a very cute [cluster module][] that allows you
-to create servers that "share a listening socket" to load balance
-across some number of spun child processes.  What if you were to
-combine cluster with one of the approaches described above?
+NodeJS 0.6.x and up offer a [cluster module][] that allows you to create processes which "share a listening socket" to balance load across some number of spun child processes.  What if you were to combine cluster with one of the approaches described above?
 
-  [cluster module]: XXX
+  [cluster module]: http://nodejs.org/docs/v0.8.14/api/all.html#all_how_it_works
 
-The problem with this approach is you must combine it with one of the
-approaches we've already explored, and you inherit the shortcomings of
-them.  Mainly, this is not a road that leads to **responsiveness** and
-**grace**.
+The problem with this approach that we inherit the shortcomings of synchronous or internally threaded solutions.  Mainly, this is not a road that leads to **responsiveness** and **grace**.
 
-**tl;dr;**: Creating more application instances isn't always the
-solution.
+**tl;dr;**: Creating more application instances isn't always the answer.
 
 ## Introducing compute-cluster
 
-Our current solution to this problem in persona is our very own node
-module called [compute-cluster][].
+Our current solution to this problem in Persona is to manage a cluster of single-purpose processes for computation.  We've generalized this solution in the [compute-cluster][] library.
 
   [compute-cluster]: https://github.com/lloyd/node-compute-cluster
 
-`compute-cluster` is small library that spawns and manages processes
-for you, giving you a programatic means of running work on a local
-cluster of child processes.  Usage is simple:
+`compute-cluster` spawns and manages processes for you, giving you a programatic means of running work on a local cluster of child processes.  Usage is thus:
 
     const computecluster = require('compute-cluster');
     
@@ -182,8 +111,7 @@ cluster of child processes.  Usage is simple:
       console.log("bar done", result);
     });
 
-The file `worker.js` should respond to `message` events to handle incoming
-work:
+The file `worker.js` should respond to `message` events to handle incoming work:
 
     process.on('message', function(m) {
       var output;
@@ -191,83 +119,40 @@ work:
       process.send(output);
     });
 
-You can integrate compute-cluster into a javascript library and expose
-an asynchronous API the just works, and really does perform work in
-the background and in parallel.
+You can integrate compute-cluster behind an existing asynchronous API without modifying the caller, and suddenly you really are performing work in parallel across multiple processors.
 
 So how can we achieve our four criteria armed with this new module?
 
-**saturation**: because we can dial up the number of worker processes,
-we can fully leverage any number of cores on a machine.
+**saturation**: because we can dial up the number of worker processes, we can fully leverage any number of cores on a machine.
 
-**responsiveness**: Because the managing process is doing nothing more 
-than process spawning and message passing, it remains idle and can spend
-most of it's time handling other, interactive requests.  Even if the
-machine is slammed, the operating system scheduler can help prioritize
-the management process.
+**responsiveness**: Because the managing process is doing nothing more than process spawning and message passing, it remains idle and can spend most of its time handling interactive requests.  Even if the machine is loaded, the operating system scheduler can help prioritize the management process.
 
-**simplicity**: By hiding the details of `compute-cluster` behind a
-simple API with expected asynchronous calling semantics, you can
-calling code happily oblivious of the details, making integration
-into an existing project easy.
+**simplicity**: By hiding the details of `compute-cluster` behind a simple API with expected asynchronous calling semantics, you can keep code happily oblivious of the details, making integration into an existing project easy.
 
 ### The Question of *Grace*
 
-Compute cluster manages a bit more than just process spawning and message
-passing.  It knows how much work is running, and knows empirically how
-long work takes to finish on average.  These bits allow us to reliably
-predict how long a new bit of work will take to finish.
+Compute cluster manages a bit more than just process spawning and message passing.  It knows how much work is running, and knows empirically how long work takes work to finish on average.  These bits allow us to reliably predict how long a new bit of work will take to complete.
 
-When we combine this knowledge with a client supplied parameter,
-`max_request_time`, it becomes possible to preemptively fail on requests
-that are likely to take longer than allowable.  
+When we combine this knowledge with a client supplied parameter, `max_request_time`, it becomes possible to preemptively fail on requests that are likely to take longer than allowable.  
 
-This feature let's you easily map a user experience requirement into
-your code: "The user should not have to wait more than 10s to login", results
-in a `max_request_time` of about 7 seconds (with padding for network time).
+This feature lets you easily map a user experience requirement into your code: "The user should not have to wait more than 10s to login", results in a `max_request_time` of about 7 seconds (with padding for network time).
 
-In load testing the persona service, the results so far are promising.
-Under times of extreme load we are able allow authenticated users to
-continue to use the service, and block a portion of unauthenticated users right
-up front.
+In load testing the persona service, the results so far are promising. Under times of extreme load we are able allow authenticated users to continue to use the service, and block a portion of unauthenticated users right up front.
 
 ## Next Steps
 
-Application level parallelization using processes works well for a
-single tier deployment architecture - An arrangement where you have
-only one type of node and simple add more to support scale.  As applications
-get more complex however, it is likely the deployment architecture
-will evolve to have different application tiers to support performance
+Application level parallelization using processes works well for a single tier deployment architecture - An arrangement where you have only one type of node and simply add more to support scale.  As applications get more complex however, it is likely the deployment architecture will evolve to have different application tiers to support performance
 or security goals.
 
-In addition to multiple deployment tiers, high availability and scale often
-require application deployment in multiple colocation facilities.
+In addition to multiple deployment tiers, high availability and scale often require application deployment in multiple colocation facilities.
 
-Finally, cost effective scaling of a computationally bound application
-can be achieved by leveraging on-demand cloud based computation resources.
+Finally, cost effective scaling of a computationally bound application can be achieved by leveraging on-demand cloud based computation resources.
 
-Multiple tiers in multiple colos changes the parameters of the scaling problem
-considerably while the goals remain the same.
+Multiple tiers in multiple colos with demand spun cloud servers changes the parameters of the scaling problem considerably while the goals remain the same.
 
-The future of `compute-cluster` may involve the ability to distribute work
-over multiple different tiers to maximally saturate available computation
-resources in times of load.  This may work cross-colo to support
-geographically asymmetric bursts.  This may involve the ability to leverage
-new hardware that's demand spun at some trusted cloud compute provider.
-Or we may solve the problem a different way.
+The future of `compute-cluster` may involve the ability to distribute work over multiple different tiers to maximally saturate available computation resources in times of load.  This may work cross-colo to support geographically asymmetric bursts.  This may involve the ability to leverage new hardware that's demand spun at some trusted cloud compute provider…
+Or we may solve the problem a different way!
 
-Whatever we do, we'll be sure to blog up our learnings!  Thanks for reading, and
-you can learn more about current scaling challenges and approaches in Persona on
-[our email list][].
+Whatever we do, we'll be sure to blog up our learnings!  Thanks for reading, and you can learn more about current scaling challenges and approaches in Persona on [our email list][].
 
-  [our email list]: XXX link to scaling approach email
-
-
-[footnote 1] bcrypt does this by leveraging the same threadpool that
-NodeJS itself uses to internally parallelize requests.  This calls
-out that when I said "NodeJS runs almost completely on one processor"
-I was over-simplifying.  As of 0.8.x node's internal parallelization allows
-single threaded application code to run at 150% to 200% processor usage
-by implementing concurrency at a low level that the application remains
-blissfully ignorant of.
-[footnote 2] XXX say more about this upper bound
+  [our email list]: https://groups.google.com/d/msg/mozilla.dev.identity/st_eL7kUpUw/hrOUUatl5i0J
