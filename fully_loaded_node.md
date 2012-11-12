@@ -29,14 +29,14 @@ Armed with this, we can meaningfully contrast several different approaches:
 
 ### Approach 1: Just do it on the main thread.
 
-If we simply perform computation work on the main thread, the results are terrible.  You cannot *saturate* multiple computation cores, and you cannot be *responsive* nor *graceful* with repeated half second starvation of interactive requests.  The only thing this approach has going for it is *simplicity*:
+If we simply perform computation work on the main thread, the results are terrible.  You cannot **saturate** multiple computation cores, and you cannot be **responsive** nor **graceful** with repeated half second starvation of interactive requests.  The only thing this approach has going for it is **simplicity**:
 
     function myRequestHandler(request, response) [
       // Let's bring everything to a grinding halt for half a second.
       var results = doComputationWorkSync(request.somesuch);
     }
 
-**tl;dr;**: Synchronous computation is bad.
+**tl;dr**: Synchronous computation is bad.
 
 ### Approach 2: Do it Asynchronously.
 
@@ -56,15 +56,15 @@ We can improve this implementation by using asynchronous functions that run in t
       // Even though this *looks* better, we're still bringing everything 
       // to a grinding halt.
       doComputationWork(request.somesuch, function(err, results) {
-        // … do something with results ...
+        // ... do something with results ...
       });
     }
 
-**tl;dr;** An asynchronous API in NodeJS does not imply that work is run on a different processor.
+**tl;dr**: An asynchronous API in NodeJS does not imply that work is run on a different processor.
 
 ### Approach 3: Do it Asynchronously with Threaded Libraries!
 
-If you have a library that is written in native code and cleverly implemented, you can actually execute the costly work in different threads from within NodeJS.  Many examples exist, one being the excellent [bcrypt library][] from [Nick Campbell[].
+If you have a library that is written in native code and cleverly implemented, you can actually execute the costly work in different threads from within NodeJS.  Many examples exist, one being the excellent [bcrypt library][] from [Nick Campbell][].
 
   [bcrypt library]: http://github.com/ncb000gt/node.bcrypt.js
   [Nick Campbell]: http://github.com/ncb000gt
@@ -78,7 +78,7 @@ A more fundamental problem with this approach (which partially explains why uppi
 
 Libraries that are "internally threaded" in this manner both fail to **saturate** multiple cores and adversely affect **responsiveness** under load.
 
-**tl;dr;** Don't use library features that claim to be "internally threaded" to parallelize compute work.
+**tl;dr**: Don't use library features that claim to be "internally threaded" to parallelize compute work.
 
 ### Use node's cluster module!
 
@@ -88,7 +88,7 @@ NodeJS 0.6.x and up offer a [cluster module][] that allows you to create process
 
 The problem with this approach that we inherit the shortcomings of synchronous or internally threaded solutions.  Mainly, this is not a road that leads to **responsiveness** and **grace**.
 
-**tl;dr;**: Creating more application instances isn't always the answer.
+**tl;dr**: Creating more application instances isn't always the answer.
 
 ## Introducing compute-cluster
 
@@ -119,7 +119,7 @@ The file `worker.js` should respond to `message` events to handle incoming work:
       process.send(output);
     });
 
-You can integrate compute-cluster behind an existing asynchronous API without modifying the caller, and suddenly you really are performing work in parallel across multiple processors.
+You can integrate `compute-cluster` behind an existing asynchronous API without modifying the caller, and suddenly you really are performing work in parallel across multiple processors.
 
 So how can we achieve our four criteria armed with this new module?
 
@@ -137,12 +137,11 @@ When we combine this knowledge with a client supplied parameter, `max_request_ti
 
 This feature lets you easily map a user experience requirement into your code: "The user should not have to wait more than 10s to login", results in a `max_request_time` of about 7 seconds (with padding for network time).
 
-In load testing the persona service, the results so far are promising. Under times of extreme load we are able allow authenticated users to continue to use the service, and block a portion of unauthenticated users right up front.
+In load testing the Persona service, the results so far are promising. Under times of extreme load we are able allow authenticated users to continue to use the service, and block a portion of unauthenticated users right up front.
 
 ## Next Steps
 
-Application level parallelization using processes works well for a single tier deployment architecture - An arrangement where you have only one type of node and simply add more to support scale.  As applications get more complex however, it is likely the deployment architecture will evolve to have different application tiers to support performance
-or security goals.
+Application level parallelization using processes works well for a single tier deployment architecture - An arrangement where you have only one type of node and simply add more to support scale.  As applications get more complex however, it is likely the deployment architecture will evolve to have different application tiers to support performance or security goals.
 
 In addition to multiple deployment tiers, high availability and scale often require application deployment in multiple colocation facilities.
 
@@ -150,7 +149,7 @@ Finally, cost effective scaling of a computationally bound application can be ac
 
 Multiple tiers in multiple colos with demand spun cloud servers changes the parameters of the scaling problem considerably while the goals remain the same.
 
-The future of `compute-cluster` may involve the ability to distribute work over multiple different tiers to maximally saturate available computation resources in times of load.  This may work cross-colo to support geographically asymmetric bursts.  This may involve the ability to leverage new hardware that's demand spun at some trusted cloud compute provider…
+The future of `compute-cluster` may involve the ability to distribute work over multiple different tiers to maximally saturate available computation resources in times of load. This may work cross-colo to support geographically asymmetric bursts.  This may involve the ability to leverage new hardware that's demand spun at some trusted cloud compute provider...
 Or we may solve the problem a different way!
 
 Whatever we do, we'll be sure to blog up our learnings!  Thanks for reading, and you can learn more about current scaling challenges and approaches in Persona on [our email list][].
