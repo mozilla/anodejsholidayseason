@@ -14,7 +14,7 @@ This post will explore the various high level approaches available to building N
   
 ## The Problem
 
-We choose Node.JS for [Mozilla Persona][], where we built a server that could handle a large number of requests with mixed characteristics.  Our "Interactive" requests have low computational cost to execute and need to get done fast to keep the UI feeling responsive, while "Batch" operations require about 500ms of processor time and can be delayed a bit longer without making the user sad.
+We chose Node.JS for [Mozilla Persona][], where we built a server that could handle a large number of requests with mixed characteristics.  Our "Interactive" requests have low computational cost to execute and need to get done fast to keep the UI feeling responsive, while "Batch" operations require about 500ms of processor time and can be delayed a bit longer without making the user sad.
 
   [Mozilla Persona]: https://persona.org
 
@@ -29,6 +29,10 @@ Armed with this, we can meaningfully contrast several different approaches:
 
 ### Approach 1: Just do it on the main thread.
 
+[I'm not into the tl;dr;, but if used... they should go in front, no?]
+
+**tl;dr;**: Synchronous computation is bad.
+
 If we simply perform computation work on the main thread, the results are terrible.  You cannot *saturate* multiple computation cores, and you cannot be *responsive* nor *graceful* with repeated half second starvation of interactive requests.  The only thing this approach has going for it is *simplicity*:
 
     function myRequestHandler(request, response) [
@@ -36,9 +40,9 @@ If we simply perform computation work on the main thread, the results are terrib
       var results = doComputationWorkSync(request.somesuch);
     }
 
-**tl;dr;**: Synchronous computation is bad.
-
 ### Approach 2: Do it Asynchronously.
+
+**tl;dr;** An asynchronous API in NodeJS does not imply that work is run on a different processor.
 
 We can improve this implementation by using asynchronous functions that run in the *background*, right?  Well, kind of.  It depends on what precisely the *background* means.  If your computation function is implemented in such a way that it actually performs computation in javascript or Native code on the main thread, then you are doing no better than with a synchronous approach:  
 
@@ -60,9 +64,9 @@ We can improve this implementation by using asynchronous functions that run in t
       });
     }
 
-**tl;dr;** An asynchronous API in NodeJS does not imply that work is run on a different processor.
-
 ### Approach 3: Do it Asynchronously with Threaded Libraries!
+
+**tl;dr;** Don't use library features that claim to be "internally threaded" to parallelize compute work.
 
 If you have a library that is written in native code and cleverly implemented, you can actually execute the costly work in different threads from within NodeJS.  Many examples exist, one being the excellent [bcrypt library][] from [Nick Campbell[].
 
@@ -70,7 +74,9 @@ If you have a library that is written in native code and cleverly implemented, y
   [Nick Campbell]: http://github.com/ncb000gt
 
 If you test this out on a four core machine, what you will see will look fantastic!  Four times the throughput, leveraging all computation resources!  If you perform the same test on a 24 core processor, you won't be as happy: you will see four cores fully utilized while the
-rest sit idle.  The problem here is that the library is using NodeJS's internal threadpool for a problem that it was not designed for, and this threadpool has a [hardcoded upper bound of 4][].
+rest sit idle.
+
+The problem here is that the library is using NodeJS's internal threadpool for a problem that it was not designed for, and this threadpool has a [hardcoded upper bound of 4][].
 
   [hardcoded upper bound of 4]: https://github.com/joyent/node/blob/e2bcff9aa75e51b9ba071330fe712180abed03e0/deps/uv/src/unix/threadpool.c#L31
 
@@ -78,17 +84,18 @@ A more fundamental problem with this approach (which partially explains why uppi
 
 Libraries that are "internally threaded" in this manner both fail to **saturate** multiple cores and adversely affect **responsiveness** under load.
 
-**tl;dr;** Don't use library features that claim to be "internally threaded" to parallelize compute work.
+[Would be great to have screenshots in these last examples, which you had in your talk]
+
 
 ### Use node's cluster module!
+
+**tl;dr;**: Creating more application instances isn't always the answer.
 
 NodeJS 0.6.x and up offer a [cluster module][] that allows you to create processes which "share a listening socket" to balance load across some number of spun child processes.  What if you were to combine cluster with one of the approaches described above?
 
   [cluster module]: http://nodejs.org/docs/v0.8.14/api/all.html#all_how_it_works
 
 The problem with this approach that we inherit the shortcomings of synchronous or internally threaded solutions.  Mainly, this is not a road that leads to **responsiveness** and **grace**.
-
-**tl;dr;**: Creating more application instances isn't always the answer.
 
 ## Introducing compute-cluster
 
@@ -149,6 +156,8 @@ In addition to multiple deployment tiers, high availability and scale often requ
 Finally, cost effective scaling of a computationally bound application can be achieved by leveraging on-demand cloud based computation resources.
 
 Multiple tiers in multiple colos with demand spun cloud servers changes the parameters of the scaling problem considerably while the goals remain the same.
+
+[Suggestion for the next two paragraphs, make them sound more inclusive and open to community input?]
 
 The future of `compute-cluster` may involve the ability to distribute work over multiple different tiers to maximally saturate available computation resources in times of load.  This may work cross-colo to support geographically asymmetric bursts.  This may involve the ability to leverage new hardware that's demand spun at some trusted cloud compute provider…
 Or we may solve the problem a different way!
