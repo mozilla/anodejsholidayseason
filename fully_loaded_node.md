@@ -100,7 +100,7 @@ Libraries that are "internally threaded" in this manner both fail to **saturate*
 
 **tl;dr**: Don't use library features that claim to be "internally threaded" to parallelize compute work.
 
-### Use node's cluster module!
+### Approach 4: Use node's cluster module!
 
 NodeJS 0.6.x and up offer a [cluster module][] that allows you to create processes which "share a listening socket" to balance load across some number of spun child processes.
 What if you were to combine cluster with one of the approaches described above?
