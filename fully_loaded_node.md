@@ -6,16 +6,15 @@
 
   [Lloyd Hilaiel at Node Philly 2012]: http://www.youtube.com/watch?v=U0hNgO5hrtc
 
-A Node.JS process runs almost completely on a single processing core, and building scalable servers requires special care.  
-With the ability to write native extensions and a robust set of APIs for managing processes, there are many different ways to design a Node.JS application.
-This post evaluates several high level approaches to building Node.JS servers that run extra hot.
+A Node.JS process runs almost completely on a single processing core, and building scalable servers requires special care.
+With the ability to write native extensions and a robust set of APIs for managing processes, there are many different ways to design a Node.JS application that executes code in parallel: in this post we'll evaluate these possible designs.
 
-This post also introduces the [compute-cluster][] module: a small Node.JS library that makes it easy to manage a collection of processes and distribute computation.
+This post also introduces the [compute-cluster][] module: a small Node.JS library that makes it easy to manage a collection of processes to distribute computation.
 
 ## The Problem
 
 We chose Node.JS for [Mozilla Persona][], where we built a server that could handle a large number of requests with mixed characteristics.
-Our "Interactive" requests have low computational cost to execute and need to get done fast to keep the UI feeling responsive, while "Batch" operations require about 500ms of processor time and can be delayed a bit longer without detriment to user experience.
+Our "Interactive" requests have low computational cost to execute and need to get done fast to keep the UI feeling responsive, while "Batch" operations require about a half second of processor time and can be delayed a bit longer without detriment to user experience.
 
   [Mozilla Persona]: https://persona.org
 
@@ -23,10 +22,10 @@ To find a great application design, we looked at the type of requests our applic
 
   * **saturation**: The solution will be able to use every available processor.
   * **responsiveness**: Our application's UI should remain responsive. Always.
-  * **grace**: When overwhelmed with more traffic than we can handle, we should serve as many users as we can, and display a clear error to the remainder.
-  * **simplicity**: The solution should easy to incrementally integrate into an existing server.
+  * **grace**: When overwhelmed with more traffic than we can handle, we should serve as many users as we can, and promptly display a clear error to the remainder.
+  * **simplicity**: The solution should be easy to incrementally integrate into an existing server.
 
-Armed with these requirements, we can meaningfully contrast several different approaches:
+Armed with these requirements, we can meaningfully contrast the approaches:
 
 ### Approach 1: Just do it on the main thread.
 
@@ -45,7 +44,7 @@ Synchronous computation in a Node.JS program that is expected to serve more than
 
 Using asynchronous functions that run in the *background* will improve things, right?
 Well, that depends on what precisely the *background* means:
-If the computation function is implemented in such a way that it actually performs computation in javascript or Native code on the main thread, then you are doing no better than with a synchronous approach.
+If the computation function is implemented in such a way that it actually performs computation in javascript or Native code on the main thread, then performance is no better than with a synchronous approach.
 Have a look:
 
     function doComputationWork(input, callback) {
@@ -66,7 +65,7 @@ Have a look:
       });
     }
 
-The key point usage of an asynchronous API in NodeJS does not necessarily yield an application that can use multiple processors.
+The key point is usage of an asynchronous API in NodeJS does not necessarily yield an application that can use multiple processors.
 
 ### Approach 3: Do it Asynchronously with Threaded Libraries!
 
@@ -82,12 +81,12 @@ The problem here is that the library is using NodeJS's internal threadpool for a
 
   [hardcoded upper bound of 4]: https://github.com/joyent/node/blob/e2bcff9aa75e51b9ba071330fe712180abed03e0/deps/uv/src/unix/threadpool.c#L31
 
-Beyond from the hardcoded limits, deeper problems exist with this approach:
+Deeper problems exist with this approach, beyond from these hardcoded limits:
 
   * Flooding NodeJS's internal threadpool for computation work can starve network or file operations, which hurts **responsiveness**.
   * There's no good way to control the backlog - If you have 5 minutes of computation work already sitting in your queue, do you really want to pile more on?
 
-Libraries that are "internally threaded" in this manner both fail to **saturate** multiple cores, adversely affect **responsiveness** under load, and limit the application's ability to degrade **gracefully** under load.
+Libraries that are "internally threaded" in this manner fail to **saturate** multiple cores, adversely affect **responsiveness** under load, and limit the application's ability to degrade **gracefully** under load.
 
 ### Approach 4: Use node's cluster module!
 
@@ -96,9 +95,9 @@ What if you were to combine cluster with one of the approaches described above?
 
   [cluster module]: http://nodejs.org/docs/v0.8.14/api/all.html#all_how_it_works
 
-The resultant design would inherit the shortcomings of synchronous or internally threaded solutions: which are not **responsive** lack **grace**.
+The resultant design would inherit the shortcomings of synchronous or internally threaded solutions: which are not **responsive** and lack **grace**.
 
-Simply spinning new application instances is not always the right design.
+Simply spinning new application instances is not always the right answer.
 
 ### Approach 5: Introducing compute-cluster
 
@@ -133,11 +132,11 @@ The file `worker.js` should respond to `message` events to handle incoming work:
       process.send(output);
     });
 
-It is possible to integrate `compute-cluster` behind an existing asynchronous API without modifying the caller, and to start really are performing work in parallel across multiple processors with minimal code change.
+It is possible to integrate `compute-cluster` behind an existing asynchronous API without modifying the caller, and to start really performing work in parallel across multiple processors with minimal code change.
 
 So how does this approach achieve the four criteria?
 
-**saturation**: Multiple worker processes can use all available processing cores.
+**saturation**: Multiple worker processes use all available processing cores.
 
 **responsiveness**: Because the managing process is doing nothing more than process spawning and message passing, it remains idle and can spend most of its time handling interactive requests.
 Even if the machine is loaded, the operating system scheduler can help prioritize the management process.
@@ -147,16 +146,16 @@ Even if the machine is loaded, the operating system scheduler can help prioritiz
 Now what about **gracefully** degrading during overwhelming bursts of traffic?  
 Again, the goal is to run at maximum efficiency during bursts, and serve as many requests as possible.  
 
-Compute cluster support enables a graceful design by managing a bit more than just process spawning and message passing.
+Compute cluster enables a graceful design by managing a bit more than just process spawning and message passing.
 It keeps track of how much work is running, and how long work takes to complete on average.
 With this state it becomes possible to reliably predict how long work will take to complete *before it is enqueued*.
 
-When we combine this knowledge with a client supplied parameter, `max_request_time`, it becomes possible to preemptively fail on requests that are likely to take longer than allowable.
+Combining this knowledge with a client supplied parameter, `max_request_time`, makes it possible to preemptively fail on requests that are likely to take longer than allowable.
 
-This feature lets you easily map a user experience requirement into your code: "The user should not have to wait more than 10s to login", results in a `max_request_time` of about 7 seconds (with padding for network time).
+This feature lets you easily map a user experience requirement into your code: "The user should not have to wait more than 10s to login", translates into a `max_request_time` of about 7 seconds (with padding for network time).
 
 In load testing the Persona service, the results so far are promising.
-Under times of extreme load we are able allow authenticated users to continue to use the service, and block a portion of unauthenticated users right up front.
+Under times of extreme load we are able allow authenticated users to continue to use the service, and block a portion of unauthenticated users right up front with a clear error message.
 
 ## Next Steps
 
