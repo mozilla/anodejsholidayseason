@@ -6,28 +6,13 @@
 
   [Lloyd Hilaiel at Node Philly 2012]: http://www.youtube.com/watch?v=U0hNgO5hrtc
 
-There was time, not too long ago, when having multiple processing cores within a single CPU was not an option: in order to build a parallel workstation you needed an expensive motherboard that supported multiple CPUs.
-These boards were decidedly not for everyday consumers.
-Much of the software available, including OS kernels and drivers, were not optimized for multiple processors.
-The reward for a technolust to deploy multiple cores in data centers or as workstations was often rewarded with unstable systems and diminishing returns.
-*Those days are gone.*
-Today we reliably run at least two cores on our desktops, in our laptops, and on our smart phones.
-Spinning up a 12 core machine in the cloud is commonplace.
-We live in a multiprocessing world, and we're not turning back - our software must adapt.
+With Node.JS, all of your application code runs on a single processor. The word thread is not present in the current Node.JS API, nor are there any synchronization primitives. This is not an oversight. This post explores several high level approaches to building Node.JS servers that run extra hot.
 
-Given this trend, the frenzy around Node.JS as an emergent server software platform may seem initially ironic.
-With Node.JS, all of your application code runs on a single processor.
-The word *thread* is not present in the current stable Node.JS API and there are no synchronization primitives.
-It turns out that this was not an oversight in the design of Node.JS.
-There are many ways to build a service that leverages all processing cores available.
-Approaches range from internal threading in libraries you use, to spawning multiple processes either manually, or managed by software, or by your Node.JS applications themselves.
-
-This post will explore the various high level approaches available to building Node.JS servers that run extra hot.
-We will present the [compute-cluster][] module, which is a small Node.JS library that makes it easy to manage a collection of processes which distribute computation across multiple processors.
+This post also presents the [compute-cluster][] module: a small Node.JS library that makes it easy to manage a collection of processes and distribute computation.
   
 ## The Problem
 
-We choose Node.JS for [Mozilla Persona][], where we built a server that could handle a large number of requests with mixed characteristics.
+We chose Node.JS for [Mozilla Persona][], where we built a server that could handle a large number of requests with mixed characteristics.
 Our "Interactive" requests have low computational cost to execute and need to get done fast to keep the UI feeling responsive, while "Batch" operations require about 500ms of processor time and can be delayed a bit longer without making the user sad.
 
   [Mozilla Persona]: https://persona.org
@@ -51,8 +36,6 @@ The only thing this approach has going for it is **simplicity**:
       // Let's bring everything to a grinding halt for half a second.
       var results = doComputationWorkSync(request.somesuch);
     }
-
-**tl;dr**: Synchronous computation is bad.
 
 ### Approach 2: Do it Asynchronously.
 
@@ -78,7 +61,7 @@ If your computation function is implemented in such a way that it actually perfo
       });
     }
 
-**tl;dr**: An asynchronous API in NodeJS does not imply that work is run on a different processor.
+The key point is an asynchronous API in NodeJS does not imply that work is run on a different processor.
 
 ### Approach 3: Do it Asynchronously with Threaded Libraries!
 
@@ -89,6 +72,7 @@ Many examples exist, one being the excellent [bcrypt library][] from [Nick Campb
   [Nick Campbell]: http://github.com/ncb000gt
 
 If you test this out on a four core machine, what you will see will look fantastic!  Four times the throughput, leveraging all computation resources!  If you perform the same test on a 24 core processor, you won't be as happy: you will see four cores fully utilized while the rest sit idle.
+
 The problem here is that the library is using NodeJS's internal threadpool for a problem that it was not designed for, and this threadpool has a [hardcoded upper bound of 4][].
 
   [hardcoded upper bound of 4]: https://github.com/joyent/node/blob/e2bcff9aa75e51b9ba071330fe712180abed03e0/deps/uv/src/unix/threadpool.c#L31
@@ -98,8 +82,6 @@ This can include things like network or file IO.
 
 Libraries that are "internally threaded" in this manner both fail to **saturate** multiple cores and adversely affect **responsiveness** under load.
 
-**tl;dr**: Don't use library features that claim to be "internally threaded" to parallelize compute work.
-
 ### Approach 4: Use node's cluster module!
 
 NodeJS 0.6.x and up offer a [cluster module][] that allows you to create processes which "share a listening socket" to balance load across some number of spun child processes.
@@ -108,11 +90,9 @@ What if you were to combine cluster with one of the approaches described above?
   [cluster module]: http://nodejs.org/docs/v0.8.14/api/all.html#all_how_it_works
 
 The problem with this approach that we inherit the shortcomings of synchronous or internally threaded solutions.
-Mainly, this is not a road that leads to **responsiveness** and **grace**.
+This is not a road that leads to **responsiveness** and **grace**, and simply spinning new application instances is not always the right design.
 
-**tl;dr**: Creating more application instances isn't always the answer.
-
-## Introducing compute-cluster
+### Approach 5: Introducing compute-cluster
 
 Our current solution to this problem in Persona is to manage a cluster of single-purpose processes for computation.
 We've generalized this solution in the [compute-cluster][] library.
@@ -181,6 +161,7 @@ Multiple tiers in multiple colos with demand spun cloud servers changes the para
 The future of `compute-cluster` may involve the ability to distribute work over multiple different tiers to maximally saturate available computation resources in times of load.
 This may work cross-colo to support geographically asymmetric bursts.
 This may involve the ability to leverage new hardware that's demand spun at some trusted cloud compute provider...
+
 Or we may solve the problem a different way!
 
 Whatever we do, we'll be sure to blog up our learnings!  Thanks for reading, and you can learn more about current scaling challenges and approaches in Persona on [our email list][].
