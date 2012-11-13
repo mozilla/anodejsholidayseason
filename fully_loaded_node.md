@@ -174,4 +174,4 @@ Or we may solve the problem a different way!  If you have thoughts on an elegant
 
 Thanks for reading, and you join the discussion and learn more about current scaling challenges and approaches in Persona on [our email list][].
 
-  [our email list]: https://groups.google.com/d/msg/mozilla.dev.identity/st_eL7kUpUw/hrOUUatl5i0J
+  [our email list]: https://www.mozilla.org/about/forums/#dev-identity
