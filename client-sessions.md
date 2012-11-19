@@ -1,4 +1,4 @@
-# client-side sessions with Node.JS
+# Using secure client-side sessions to build scalable Node.JS applications
 
 Static websites are easy to scale. You can cache the heck out of them and
 you don't have state to propagate between the various servers that deliver
