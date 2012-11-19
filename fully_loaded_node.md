@@ -6,7 +6,7 @@
 
   [Lloyd Hilaiel at Node Philly 2012]: http://www.youtube.com/watch?v=U0hNgO5hrtc
 
-A Node.JS process runs almost completely on a single processing core, and building scalable servers requires special care.
+A Node.JS process runs almost completely on a single processing core, because of this building scalable servers requires special care.
 With the ability to write native extensions and a robust set of APIs for managing processes, there are many different ways to design a Node.JS application that executes code in parallel: in this post we'll evaluate these possible designs.
 
 This post also introduces the [compute-cluster][] module: a small Node.JS library that makes it easy to manage a collection of processes to distribute computation.
@@ -30,7 +30,7 @@ Armed with these requirements, we can meaningfully contrast the approaches:
 ### Approach 1: Just do it on the main thread.
 
 When computation is performed on the main thread. the results are terrible:
-You cannot **saturate** multiple computation cores, and you cannot be **responsive** nor **graceful** with repeated half second starvation of interactive requests.
+You cannot **saturate** multiple computation cores, and with repeated half second starvation of interactive requests you cannot be **responsive** nor **graceful**.
 The only thing this approach has going for it is **simplicity**:
 
     function myRequestHandler(request, response) [
@@ -83,10 +83,10 @@ The problem here is that the library is using NodeJS's internal threadpool for a
 
 Deeper problems exist with this approach, beyond from these hardcoded limits:
 
-  * Flooding NodeJS's internal threadpool for computation work can starve network or file operations, which hurts **responsiveness**.
+  * Flooding NodeJS's internal threadpool with computation work can starve network or file operations, which hurts **responsiveness**.
   * There's no good way to control the backlog - If you have 5 minutes of computation work already sitting in your queue, do you really want to pile more on?
 
-Libraries that are "internally threaded" in this manner fail to **saturate** multiple cores, adversely affect **responsiveness** under load, and limit the application's ability to degrade **gracefully** under load.
+Libraries that are "internally threaded" in this manner fail to **saturate** multiple cores, adversely affect **responsiveness**, and limit the application's ability to degrade **gracefully** under load.
 
 ### Approach 4: Use node's cluster module!
 
@@ -128,7 +128,7 @@ The file `worker.js` should respond to `message` events to handle incoming work:
       var output;
       // do lots of work here, and we don't care that we're blocking the 
       // main thread because this process is intended to do one thing at a time.
-      var results = doComputationWorkSync(m.input);
+      var output = doComputationWorkSync(m.input);
       process.send(output);
     });
 
@@ -143,7 +143,7 @@ Even if the machine is loaded, the operating system scheduler can help prioritiz
 
 **simplicity**: Integration into an existing project is easy: By hiding the details of `compute-cluster` behind a simple asynchronous API, calling code remains happily oblivious of the details.
 
-Now what about **gracefully** degrading during overwhelming bursts of traffic?  
+Now what about **gracefully** degrading during overwhelming bursts of traffic?
 Again, the goal is to run at maximum efficiency during bursts, and serve as many requests as possible.  
 
 Compute cluster enables a graceful design by managing a bit more than just process spawning and message passing.
@@ -168,7 +168,7 @@ Multiple tiers in multiple colos with demand spun cloud servers changes the para
 
 The future of [compute-cluster][] may involve the ability to distribute work over multiple different tiers to maximally saturate available computation resources in times of load.
 This may work cross-colo to support geographically asymmetric bursts.
-This may involve the ability to leverage new hardware that's demand spun at some trusted cloud compute provider...
+This may involve the ability to leverage new hardware that's demand spun...
 
 Or we may solve the problem a different way!  If you have thoughts on an elegant way to enable [compute-cluster][] to distribute work over the network while preserving the properties it has thus far, I'd love to hear them!
 
