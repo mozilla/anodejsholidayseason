@@ -85,7 +85,7 @@ To terminate the session, use the reset function:
       req.session.reset();
     });
 
-# gotchas
+# Session revocation is now much harder
 
 One of the main downsides of client-side sessions as compared to server-side
 ones is that the server no longer has the ability to destroy sessions.
