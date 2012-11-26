@@ -12,7 +12,7 @@ details on the server under this identifier.
 
 # Scaling a stateful service
 
-Now, if you want to scale that service, you essentially have to:
+Now, if you want to scale that service, you essentially have three options:
 
 1. replicate that session data across all of the web servers,
 2. use a central store that each web server connects to, or
