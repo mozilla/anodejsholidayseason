@@ -33,9 +33,9 @@ the session data on the client.
 Pushing the session data to the browser has some obvious advantages:
 
 1. the data is always available, regardless of which machine is serving a user
-2. there is no state to lose on the server
-3. new web servers can be added instantly
-4. nothing needs to be replicated between the web servers
+2. there is no state to manage on servers
+3. nothing needs to be replicated between the web servers
+4. new web servers can be added instantly
 
 There is one key problem though: you cannot trust the client not to tamper
 with the session data.
