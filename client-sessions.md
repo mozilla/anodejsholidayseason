@@ -1,4 +1,4 @@
-# Using secure client-side sessions to build scalable Node.JS applications
+# Using secure client-side sessions to build simple and scalable Node.JS applications
 
 Static websites are easy to scale. You can cache the heck out of them and
 you don't have state to propagate between the various servers that deliver
@@ -50,14 +50,21 @@ tamper-proof package. That way, there is no need to trust that the
 user hasn't modified the session data. It can be verified by the
 server.
 
-What that means in practice is that you use [authenticated encryption](https://en.wikipedia.org/wiki/Authenticated_encryption) to
-keep users from reading or modifying the session data and then you put that encrypted data inside the cookie. This is what [client-sessions](https://github.com/benadida/node-client-sessions) does.
+What that means in practice is that you encrypt and sign the cookie
+using a server key to keep users from reading or modifying the session
+data. This is what
+[client-sessions](https://github.com/benadida/node-client-sessions)
+does.
 
 # node-client-sessions
 
-It's quite simple to get started with client-sessions because it was designed as a
-[Connect](http://www.senchalabs.org/connect/) / [Express](http://expressjs.com/) middleware. It replaces connect's built-in [session](http://www.senchalabs.org/connect/session.html)
-and [cookieParser](http://www.senchalabs.org/connect/cookieParser.html) middlewares.
+If you use Node.JS, there's a library available that makes getting
+started with client-side sessions trivial:
+[node-client-sessions](https://github.com/benadida/node-client-sessions). It
+replaces [Connect](http://www.senchalabs.org/connect/)'s built-in
+[session](http://www.senchalabs.org/connect/session.html) and
+[cookieParser](http://www.senchalabs.org/connect/cookieParser.html)
+middlewares.
 
 This is how you can add it to a [simple Express application](https://github.com/fmarier/node-client-sessions-sample):
 
@@ -85,23 +92,23 @@ To terminate the session, use the reset function:
       req.session.reset();
     });
 
-# Session revocation is now much harder
+# Immediate revocation of Persona sessions
 
 One of the main downsides of client-side sessions as compared to server-side
 ones is that the server no longer has the ability to destroy sessions.
 
-Using a server-side scheme, it's enough to delete the session data that's
-stored on the server because any cookies that remain on clients will now
-point to a non-existent session. With a client-side scheme though, the
-session data is not on the server, so the server cannot be sure that it has
-been deleted on every client.
+Using a server-side scheme, it's enough to delete the session data
+that's stored on the server because any cookies that remain on clients
+will now point to a non-existent session. With a client-side scheme
+though, the session data is not on the server, so the server cannot be
+sure that it has been deleted on every client. In other words, we
+can't easily synchronize the server state (user logged out) with the
+state that's stored on the client (user logged in).
 
 To compensate for this limitation, client-sessions adds an expiry to the
 cookies. Before unpacking the session data stored in the encrypted cookie,
 the server will check that it hasn't expired. If it has, it will simply
 refuse to honour it and consider the user as logged out.
-
-# Immediate revocation of Persona sessions
 
 While the expiry scheme works fine in most applications (especially when it's set to a
 relatively low value), in the case of [Persona](https://login.persona.org),
