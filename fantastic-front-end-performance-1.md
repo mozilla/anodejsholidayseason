@@ -120,42 +120,21 @@ or
 
 ## Connect-cachify - A NodeJS library to serve concatinated and cached resources
 
-Connect-cachify[https://github.com/mozilla/connect-cachify/] is a NodeJS library developed by Mozilla that makes it simple to serve concatinated and cached resources. Concatenated resources with far future cache headers are served in production mode while individual resources without cache headers are served in development mode.
+Connect-cachify[https://github.com/mozilla/connect-cachify/] is a NodeJS middleware developed by Mozilla that makes it easy to serve up properly concatenated and cached resources.
 
-Connect-cachify does not perform concatenation itself but instead relies on you to do this in your project's build script. Connect-cachify takes a map of production to development resources and generates the appropriate `script` or `link` tags for the environment.
+While in production mode, connect-cachify serves up your pregenerated production resources with a cache expiration of one year. If not in production mode, individual development resources are served instead, making debugging easy. Connect-cachify does not perform concatenation and minification itself but instead relies on you to do this in your project's build script.
 
-Servers in development mode will send individual resources, allowing developers to easily debug. A server in production mode will send pre-generated production resources and set the proper cache headers.
+Configuration of connect-cachify is done through the setup function. Setup takes two parameters, `assets` and `options`. `assets` is a dictionary of production to development resources. Each production resource maps to a list its individual development resources.
 
+`options` is an optional dictionary that can take the following values:
+* `prefix` - String to prepend to the hash in links. (**Default: none**)
+* `production` - Boolean indicating whether to serve development or production resources. (**Defaults to true**)
+* `root` - The fully qualified path from which static resources are served. This is the same value that you'd send to the static middleware. (**Default: '.'**)
 
-Example initialization of connect-cachify:
+### Example of connect-cachify in action
 
-```
-...
-const cachify = require('connect-cachify');
+First, let's assume we have a simple HTML file we wish to use with connect-cachify. Our HTML file includes three CSS resources as well as three HTML resources.
 
-var assets = {
-  "/js/main.min.js": [
-    '/js/lib/jquery.js',
-    '/js/magick.js',
-    '/js/laughter.js'
-  ],
-  "/css/dashboard.min.css": [
-    '/css/reset.css',
-    '/css/common.css',
-    '/css/dashboard.css'
-  ]
-};
-
-app.use(cachify.setup(assets, {
-  root: __dirname,
-  production: your_config['use_minified_assets'],
-}));
-...
-```
-
-To keep code DRY, the asset map can be externalized into its own file and used as configuration to both connect-cachify and your build script. Finally, templates need to be updated to make use of cachify.
-
-EJS templates that previously looked like this:
 ```
 ...
 <head>
@@ -173,7 +152,42 @@ EJS templates that previously looked like this:
 ...
 ```
 
-Will now look like this:
+#### Set up the middleware
+
+Next, include the connect-cachify library in your NodeJS server. Create your production to development resource map and configure the middleware.
+
+```
+...
+// Include connect-cachify
+const cachify = require('connect-cachify');
+
+// Create a map of production to development resources
+var assets = {
+  "/js/main.min.js": [
+    '/js/lib/jquery.js',
+    '/js/magick.js',
+    '/js/laughter.js'
+  ],
+  "/css/dashboard.min.css": [
+    '/css/reset.css',
+    '/css/common.css',
+    '/css/dashboard.css'
+  ]
+};
+
+// Hook up the connect-cachify middleware
+app.use(cachify.setup(assets, {
+  root: __dirname,
+  production: your_config['use_minified_assets'],
+}));
+...
+```
+
+To keep code DRY, the asset map can be externalized into its own file and used as configuration to both connect-cachify and your build script.
+
+#### Update your templates to use cachify
+
+Finally, your templates must be updated to make indicate where production Javascript and CSS should be included. Javascript is included using the "cachify_js" helpers. CSS uses the cachify_css helper.
 
 ```
 ...
@@ -188,10 +202,9 @@ Will now look like this:
 ...
 ```
 
-While in production mode, cachify will set far future cache headers of all cachified resources. Cache busting is built in by inserting the MD5 hash of a resource into its URL. Whenever the resource is updated, cachify updates the MD5 hash, propagating any changes out to the user.
+#### Connect-cachified output
 
-The cachified template will be rendered as:
-
+If the `production` flag is set to false in the configuration options, connect-cachify will generate three link tags and three script tags, exactly as in the original. However, if the `production` flag is set to true, only one of each tag will be generated. The URL in each tag will have the MD5 hash of the production resources prepended onto its URL. This is used for cache-busting. When the contents of the production resource change, its hash also changes, effectively breaking the cache.
 ```
 ...
 <head>
@@ -205,7 +218,7 @@ The cachified template will be rendered as:
 ...
 ```
 
-## Conclusion
-There are a lot of easy wins when looking to speed up a site. By going back to basics and using the three Cs - concatenation, compression and caching - you will go a long way towards improving the load time of your site and the experience for your users.
+That's all there is to setting up connect-cachify.
 
-In the next installment of A NodeJS Holiday Season, we will look at how to generate dynamic resources and make use of ETagify to still serve maximally cacheable resources.
+## Conclusion
+There are a lot of easy wins when looking to speed up a site. By going back to basics and using the three Cs - concatenation, compression and caching - you will go a long way towards improving the load time of your site and the experience for your users. Connect-cachify helps with concatenation and caching in your NodeJS apps but there is still more we can do. In the next installment of A NodeJS Holiday Season, we will look at how to generate dynamic resources and make use of ETagify to still serve maximally cacheable resources.
