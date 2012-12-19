@@ -1,19 +1,26 @@
 # Fantastic front-end performance Part 1 - Concatenate, Compress & Cache
 
+In this part of our "A Node.JS Holiday Season" series we'll talk about front-end performance and introduce you to tools we've build and use in Mozilla to make the Persona front-end be as fast as possible. 
+
+We'll talk about Connect-cachify[https://github.com/mozilla/connect-cachify/], a tool to automate some of the most important parts of front-end performance. 
+
+Before we do that, though, let's recap quickly what we can do as developers to make our solutions running on the machines of our users as smoothly is possible. If you already know all about performance optimisations, feel free to proceed to the end and see how Connect-cachify helps automating some of the things you might do by hand right now.
+
+##Three Cs of client side performance
+
 The web is full of information related to performance best practices. There are many techniques to fine tune and crank up the performance of your site, today we are going to go back to basics and focus on the three building blocks to make your site fast - concatenate, compress and cache. Connect-cachify is a NodeJS library developed by Mozilla that makes two of these three easy.
 
 ## Concatenation
 
 The goal of concatenation is to minimize the number of requests made to the server. Server requests are costly. The amount of time needed to establish an HTTP connection is sometimes more expensive than the amount of time necessary to transfer the data itself. Every request adds to the overhead that it takes to view your site and can be especially problematic on mobile devices where there is significant connection latency. Have you ever browsed to a shopping site on your mobile phone while connected to the Edge network and grimaced as each image loaded one by one? That is connection latency rearing its head.
 
-SPDY is a new protocol built on top of HTTP that aims to reduce web page load time by combining resource requests into a single HTTP connection.
+SPDY[http://en.wikipedia.org/wiki/SPDY] is a new protocol built on top of HTTP that aims to reduce web page load time by combining resource requests into a single HTTP connection.
 
 It is easy to mitigate connection latency by combining resources wherever possible. Aside from HTML, most sites are primarily composed of Javascript, CSS and images. Luckily, tools exist to combine each of these.
 
 ### Javascript & CSS
 
 Sites with more than one script downloaded at the same time should consider concatenating their Javascript into a single file for production. Trying to combine Javascript resources while still in development makes debugging difficult, so this is usually done in a build stage before deployment.
-
 
 Example:
 
@@ -26,17 +33,17 @@ A build script would take these four scripts and generate a single output file w
 
   <script src="main.production.js"></script>
 
-Like Javascript, individual CSS files should be combined into a single file for production. The process to combine CSS is generally the same as to come Javascript.
+Like Javascript, individual CSS files should be combined into a single file for production. The process is the same.
 
 ### Images
 
-There are two primary methods to reduce the number of requested images - use a data URI to inline an image or combine images into an image sprite.
+There are two primary methods to reduce the number of requested images - using a data URI to inline an image or combining images into an image sprite.
 
 #### data: URI
 
 A data URI is a special value URI where the image data is encoded and embedded directly in HTML or CSS. Data URIs can be used in either the src attribute of an img tag or as the url value for a background-image in CSS.
 
-Data URIs are base64 encoded and the resulting image data will require more bytes than the original binary image, but will require one less HTTP request. Data URIs are not supported in IEs 6 and 7, so know your target audience before using them.
+Data URIs are base64 encoded and the resulting image data will require more bytes than the original binary image, but will require one less HTTP request. Data URIs are not supported in IEs 6 and 7, so know your target audience before using them. 
 
 #### Image sprites
 
@@ -45,6 +52,7 @@ Image sprites are a great alternative whenever a data URI cannot be used. An ima
 One major drawback to sprites is they can be difficult to maintain. The addition, removal or modification of an image within the sprite frequently requires a congruent change in the CSS as well.
 
 http://css-sprit.es/
+http://www.spritecow.com/
 
 ## Removing extra bytes - minification & compression
 
@@ -66,12 +74,14 @@ Images frequently contain data that can be removed without affecting its visual 
 
 http://feeding.cloud.geek.nz/2011/12/optimising-png-files.html
 
+A very useful offline tool for this is ImageOptim[http://imageoptim.com/] - simply drag and drop your images into the tool and it will reduce their size automatically. You don't need to do anything - imageOptim simply replaces the original files with the much smaller ones.
+
 If a loss of visual quality is acceptable, re-compressing an image at a higher compression level is an option.
 
 
 ### Server Level
 
-Even after combining and minifying resources, there is more we can do to reduce the number of bytes served to the user. Almost all servers and browsers support HTTP compression. The two most popular compression schemes are deflate and gzip.In both of these, the server uses efficient compression algorithms to reduce the number of bytes sent to the user.
+Even after combining and minifying resources, there is more we can do to reduce the number of bytes served to the user. Almost all servers and browsers support HTTP compression. The two most popular compression schemes are deflate and gzip. In both of these, the server uses efficient compression algorithms to reduce the number of bytes sent to the user.
 
 http://en.wikipedia.org/wiki/HTTP_compression
 
