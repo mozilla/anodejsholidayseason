@@ -1,4 +1,4 @@
-## Building A Node.JS Server That Won't Melts
+## Building A Node.JS Server That Won't Melt
 
 How can you build a Node.JS application that keeps running, even under *impossible* load?
 
