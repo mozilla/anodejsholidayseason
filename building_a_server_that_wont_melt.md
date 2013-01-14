@@ -55,7 +55,7 @@ What do we learn from this graph and the underlying data?
 
 **Success and Failure is fast**: Average response time stays for the most part under 10 seconds.
 
-**These failures don't suck**:  With pre-emptive limiting we effectivly convert slow clumsy failures (TCP timeouts), into fast deliberate failures (immediate 503 responses).
+**These failures don't suck**:  With pre-emptive limiting we effectively convert slow clumsy failures (TCP timeouts), into fast deliberate failures (immediate 503 responses).
 
 ## How To Use It
 
@@ -80,18 +80,21 @@ This application of `node-toobusy` gives you a basic level of robustness at load
 
 ## How It Works
 
-`node-toobusy` polls node.js's internal event loop multiple times a second and looks for lag.
-That is, toobusy asks to be woken in exactly 500ms, and the number of milliseconds *late* it is, is the "lag" in the event loop.
-When a server is well constructed (no computational blocks of more that about 10ms in the main application process), this lag occurs when there is more work to be done than the Node.JS process can computationally handle.
+> How do we reliably determine if a Node application is too busy?
 
-Using event loop lag as a means to determine when requests can be blocked is a good solution because it is:
+This turns out to be more interesting that you might expect, especially when you consider that `node-toobusy` attempts to work for any node application out of the box.
+In order to understand the approach taken, let's review some approaches that don't work:
 
-  1. Extremely inexpensive to check
-  2. Extremely simple
-  3. Equally well detects an overloaded host process and an overloaded host *machine*.
+**Looking at processor usage for the current process**: We could use a number like that which you see in `top` - the percentage of time that the node process has been executing on the processor.
+Once we had a way of determining this, we could say usage above 90% is "too busy".
+This approach fails when you have multiple processes on the machine that are consuming resources and there is not a full single processor available for your node application.
+In this scenario, your application would never register as "too busy" and would fail terribly - in the way explained above.
 
+**Combining system load with current usage**: To resolve this issue we could retrieve current *system load* as well and consider that in our "too busy" determination.
+We could take the system load and consider the number of available processing cores, and then determine what percentage of a processor is available for our node app!
+Very quickly this approach becomes complex, requires system specific extensions, and fails to take into account things like process priority.
 
-## More Things to Think About
+What we want is a simpler solution that Just Works.  This solution should conclude that the node.js process is too busy when it is *unable to serve requests in a timely fashion* - a criteria that is meaningful regardless of the number or nature of the other processes running on the server.
 
 
 
