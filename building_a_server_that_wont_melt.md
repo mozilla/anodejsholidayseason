@@ -45,7 +45,7 @@ Next, I instrumented the [same application with the code from the beginning of t
 This code causes the server to detect when load exceeds capacity and pre-emptively refuse requests.
 The following graph depicts the performance of this version of the server as we increase connections attempts from 40 to 3000 per second.
 
-  [same application with the code from the beginning of this post]: https://gist.github.com/4532198#file-application_server_with_toobusy-js-L25-L29
+  [same application with the code from the beginning of this post]: https://gist.github.com/4532198#file-application_server_with_toobusy-js-L26-L29
 
 ![Your server with limits](../../raw/master/building_a_server_that_wont_melt/with.png)
 
