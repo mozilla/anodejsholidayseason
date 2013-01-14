@@ -80,7 +80,7 @@ This application of `node-toobusy` gives you a basic level of robustness at load
 
 ## How It Works
 
-> How do we reliably determine if a Node application is too busy?
+*How do we reliably determine if a Node application is too busy?*
 
 This turns out to be more interesting that you might expect, especially when you consider that `node-toobusy` attempts to work for any node application out of the box.
 In order to understand the approach taken, let's review some approaches that don't work:
@@ -94,7 +94,16 @@ In this scenario, your application would never register as "too busy" and would 
 We could take the system load and consider the number of available processing cores, and then determine what percentage of a processor is available for our node app!
 Very quickly this approach becomes complex, requires system specific extensions, and fails to take into account things like process priority.
 
-What we want is a simpler solution that Just Works.  This solution should conclude that the node.js process is too busy when it is *unable to serve requests in a timely fashion* - a criteria that is meaningful regardless of the number or nature of the other processes running on the server.
+What we want is a simpler solution that Just Works.  This solution should conclude that the node.js process is too busy when it is *unable to serve requests in a timely fashion* - a criteria that is meaningful regardless of details of the other processes running on the server.
 
+The approach taken by `node-toobusy` is to measure **event loop latency**.
+Recall that Node.JS is at its core an event loop.
+Work to be done is enqueued, and each iteration is processed.
+As a node.js process becomes over-loaded, the queue grows and there is more work *to be* done than *can be* done.
+The degree to which a node.js process is overloaded can be understood by determining how long it takes a tiny bit of work to get through the event queue.
 
+Given this, `node-toobusy` measures *event loop lag* to determine how busy the host process is, which is a simple and robust technique that works regardless of whatever else is running on the host machine.
 
+## Get Involved!
+
+`node-toobusy` is a library that makes it easy to build servers that don't melt.  Read, follow, or fork on [github][] and let us know what you think!
