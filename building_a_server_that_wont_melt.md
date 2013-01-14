@@ -23,23 +23,37 @@ The first step to mitigating DoS attacks is building servers that don't melt.
 
 ## Your Server Under Load
 
-To illustrate how applications with no considerations for burst behave, I built an application server with an HTTP API that consumes 10ms of processor time spread over five asynchronous function calls (which is a rough average of the cost of request handling in the [Persona][] service).
-Here is a depiction of call latency as the number of requests doubles  every ten seconds:
+To illustrate how applications with no considerations for burst behave, I [built an application server][] with an HTTP API that consumes 5ms of processor time spread over five asynchronous function calls.
+By design, a single instance of this server is capable of handling 200 requests per second.
 
-[INSERT GRAPH HERE]
+  [built an application server]: http://badcode.tld
 
-The graph tells us that if we considered 300ms to be the maximum allowable latency for an API call, the maximum capacity of the application is around X API calls / second.
-The application breaking point is around Y API calls / second - where users wait time gets up in the 30s range for a single request.
+This roughly approximates a typical request handler that perhaps does some logging, interacts with the database, renders a template, and streams out the result.
+What follows is a graph of server latency and TCP errors as we linearly increase connection attempts from 40 to 1500 attempts per second:
+
+![Your server without limits](../../../raw/master/building_a_server_that_wont_melt/without.svg)
+
+Analysis of the data from this run tells a clear story:
+
+**This server is not responsive**:  At 2x capacity (400 requests/second) the average request time is 3 seconds, and at 4x capacity it's 9 seconds.  After a couple minutes of 5x maximum capacity, the server performs with *40 seconds of average request latency*.
+
+**These failures suck**:  With over 80% TCP failures and high latency under, users will see a confusing failure after up to a minute of waiting.
 
 ## Failing Gracefully
 
-Instrumenting the same application with the five lines of code from the beginning of this post, the graph looks like this:
+Next, I instrumented the [same application with the five lines of code from the beginning of this post][].
+This code causes the server to detect when it exceeds capacity and pre-emptively refuse requests.
+The following graph depicts the performance of this version of the server as we increase connections attempts from 40 to 3000 per second.
 
-[INSERT GRAPH HERE]
+  [same application with the five lines of code from the beginning of this post]: http://goodcode.tld
 
-Notice the presence of a new line, which is "refused requests".
-Sending pre-emptive 503 (server too busy) HTTP responses is an approach you can use to throttle requests before they consume your servers resources.
-In this case when we hit 300ms of latency, the server begins denying requests which exceed its maximum capacity.
+![Your server with limits](../../../raw/master/building_a_server_that_wont_melt/with.svg)
+
+What do we learn from this graph and the underlying data?
+
+**Pre-emptive limiting adds robustness**: Under load that exceeds capacity by an order of magnitude the application continues to behave reasonably.
+
+**Success and Failure is fast**: Average response time stays for the most part under 10 seconds.
 
 ## How To Use It
 
