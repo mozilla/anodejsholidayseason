@@ -31,7 +31,7 @@ By design, a single instance of this server is capable of handling 200 requests 
 This roughly approximates a typical request handler that perhaps does some logging, interacts with the database, renders a template, and streams out the result.
 What follows is a graph of server latency and TCP errors as we linearly increase connection attempts from 40 to 1500 attempts per second:
 
-![Your server without limits](http://htmlpreview.github.com/?https://raw.github.com/mozilla/anodejsholidayseason/master/building_a_server_that_wont_melt/without.svg)
+![Your server without limits](../../raw/master/building_a_server_that_wont_melt/without.png)
 
 Analysis of the data from this run tells a clear story:
 
@@ -47,7 +47,7 @@ The following graph depicts the performance of this version of the server as we 
 
   [same application with the five lines of code from the beginning of this post]: http://goodcode.tld
 
-![Your server with limits](http://htmlpreview.github.com/?https://raw.github.com/mozilla/anodejsholidayseason/master/building_a_server_that_wont_melt/with.svg)
+![Your server with limits](../../raw/master/building_a_server_that_wont_melt/with.png)
 
 What do we learn from this graph and the underlying data?
 
