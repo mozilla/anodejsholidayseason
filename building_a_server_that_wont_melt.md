@@ -31,7 +31,7 @@ By design, a single instance of this server is capable of handling 200 requests 
   [built an application server]: https://gist.github.com/4532177
 
 This roughly approximates a typical request handler that perhaps does some logging, interacts with the database, renders a template, and streams out the result.
-What follows is a graph of server latency and TCP errors as we linearly increase connection attempts from 40 to 1500 attempts per second:
+What follows is a graph of server latency and TCP errors as we linearly increase connection attempts:
 
 ![Your server without limits](../../raw/master/building_a_server_that_wont_melt/without.png)
 
@@ -45,7 +45,7 @@ Analysis of the data from this run tells a clear story:
 
 Next, I instrumented the [same application with the code from the beginning of this post][].
 This code causes the server to detect when load exceeds capacity and preemptively refuse requests.
-The following graph depicts the performance of this version of the server as we increase connections attempts from 40 to 3000 per second.
+The following graph depicts the performance of this version of the server as we linearly increase connections attempts:
 
   [same application with the code from the beginning of this post]: https://gist.github.com/4532198#file-application_server_with_toobusy-js-L26-L29
 
