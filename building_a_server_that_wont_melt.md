@@ -98,7 +98,7 @@ Very quickly this approach becomes complex, requires system specific extensions,
 
 What we want is a simpler solution that Just Works.  This solution should conclude that the node.js process is too busy when it is *unable to serve requests in a timely fashion* - a criteria that is meaningful regardless of details of the other processes running on the server.
 
-The approach taken by `node-toobusy` is to measure **event loop lag**.
+The approach taken by `node-toobusy` is to measure *event loop lag*.
 Recall that Node.JS is at its core an event loop.
 Work to be done is enqueued, and on each loop iteration is processed.
 As a node.js process becomes over-loaded, the queue grows and there is more work *to be* done than *can be* done.
@@ -108,16 +108,17 @@ Subtracting 500ms from the actual time elapsed between invocations gives us a si
 
   [libuv]: https://github.com/joyent/libuv
 
-In short, `node-toobusy` measures **event loop lag** to determine how busy the host process is, which is a simple and robust technique that works regardless of whatever else is running on the host machine.
+In short, `node-toobusy` measures *event loop lag* to determine how busy the host process is, which is a simple and robust technique that works regardless of whatever else is running on the host machine.
 
 ## Current State
 
-`node-toobusy` is very new library that makes it easy to build servers that don't melt by measuring **event loop lag**:
+`node-toobusy` is very new library that makes it easy to build servers that don't melt by measuring event loop lag:
 attempting to solve the general problem of determining if a node.js application is too busy.
 All of the servers described here as well as the load generation tools used in the post are available on [github][].
 
 At Mozilla we're currently evaluating applying this approach to the [Persona][] service, and expect to refine the approach as we learn.
-I look forward to your feedback: in this post, on the [identity mailing list][], or in [github issues][].
+I look forward to your feedback - as a comment on this post, on the [identity mailing list][], or in [github issues][].
 
   [identity mailing list]: https://lists.mozilla.org/listinfo/dev-identity
   [github issues]: https://github.com/lloyd/node-toobusy/issues
+  [Persona]: https://persona.org
