@@ -37,7 +37,7 @@ What follows is a graph of server latency and TCP errors as we linearly increase
 
 Analysis of the data from this run tells a clear story:
 
-**This server is not responsive**:  At 2x capacity (400 requests/second) the average request time is 3 seconds, and at 4x capacity it's 9 seconds.  After a couple minutes of 5x maximum capacity, the server performs with *40 seconds of average request latency*.
+**This server is not responsive**:  At 2x capacity (400 requests/second) the average request time is 3 seconds, and at 4x capacity it's 9 seconds.  And by 5x maximum capacity the server runs with *40 seconds of average request latency*.
 
 **These failures suck**:  With over 80% TCP failures and high latency, users will see a confusing failure after *up to a minute* of waiting.
 
