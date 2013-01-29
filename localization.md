@@ -1,3 +1,31 @@
+
+Outline
+
+1) i18n-abide, gettext
+tutorial style walkthrough of i18n-abide ifying a site?
+
+2) community and tools
+
+jsxgettext
+po2json
+history
+
+3) Deep
+
+middleware - accept language matching
+format
+gobbdegook
+skipping po files
+
+4) Beyond Node
+
+images
+BIDI
+
+------------------
+
+
+
 # How to Localize Your Node.js service
 
 ## What is localization?
@@ -13,6 +41,66 @@ The following are just a few examples of localization:
 In this series of posts, I'm going to cover some technical aspects of how to localize a Node.js service, as well as some more general techniques that work regardless of the technology.
 
 I'll be using the terms L10n (<b>L</b>ocalizatio<b>n</b>) and <b>I</b>nternationalizatio<b>n</b>, becuase we love our acronyms, right?
+
+## i18n-abide
+
+The Mozilla Persona service is a Node.js based service localized into X locales. To accomplish this, it uses the following modules
+
+* i18n-abide
+* jsxgettext
+* gobbledygook
+
+i18n-abide is the most important module from a developer's perspective. Let's walk through adding it to your service.
+
+For the sake of examples, we'll assume an Express website and EJS templates.
+
+## Installation
+
+    npm install i18n-abide
+
+In your code
+
+    var i18n = require('i18n-abide');
+
+    app.use(i18n.abide({
+      supported_languages: ['en-US', 'de', 'es', 'zh-TW', 'it-CH'],
+      default_lang: 'en-US',
+      debug_lang: 'it-CH',
+      locale_directory: 'locale'
+    }));
+[TODO: locale_directory is this needed with .json files?]
+
+The i18n `abide` middleware sets up request processing and injects various functions we'll use for translation.
+
+The key thing abide does, is it injects into the Node and express framework references to `Gettext` functions. This allows you to reference gettext strings in Node JavaScript code or in your HTML templates.
+
+Here is an example in a template file:
+
+    <html lang="{{LANG}}" dir="{{DIR}}">
+      <head>
+        <title>{{gettext('Mozilla Persona')}}</title>
+
+Abide provides `LANG`, `DIR`, and `gettext`. `LANG` is the language code based on the user's browser and preferred language settings. `DIR` is for [bidirectional text](http://en.wikipedia.org/wiki/Bi-directional_text) support.
+
+`gettext` is a JS function which will take an English string and return a localize string, again based on the user's preferred region and language.
+
+Here is an example in a JavaScript file:
+
+    app.get('/', function(req, res) {
+        res.render('homepage', {
+            title: req.gettext('Hello, World!')
+        });
+    });
+
+We can see that these variables and functions are placed in the `req` object.
+
+At runtime, the `i18n-abide` module will detect the user's prefered locale and output "Hello, World!" localized to them.
+
+So to setup our site for localization, we must look through all of our code and templates and wrap strings in calls to gettext.
+
+-----------------------
+
+# Localization community, tools, and ...
 
 ## The toolchain
 
@@ -98,25 +186,6 @@ And we get a file structure like:
         pt_BR
           messages.json
 
-### i18n-abide
-
-Next we have a module i18n-abide, which loads all of these localizations.
-
-    var abide = require('i18n-abide');
-    ...
-    abide.setup(locales);
-
-The key thing abide does, is it injects into the Node and express framework references to `Gettext` functions. This allows you to reference gettext strings in Node JavaScript code or in your HTML templates.
-
-Here is an example:
-
-    <html lang="{{LANG}}" dir="{{DIR}}">
-      <head>
-        <title>{{gettext('Mozilla Persona')}}</title>
-
-Abide provides `LANG`, `DIR`, and `gettext`. `LANG` is the language code based on the user's browser and preferred language settings. `DIR` is for [bidirectional text](http://en.wikipedia.org/wiki/Bi-directional_text) support.
-
-`gettext` is a JS function which will take an English string and return a localize string, again based on the user's preferred region and language.
 
 ### jsxgettext
 
