@@ -144,6 +144,19 @@ Proper localization is hard! You better have an API that supports proper transla
 
 That said, you can always go with a newer, more modern setup and add the missing features paper cut by paper cut. Just, please, look at Gettext and other older systems for API inspiration. They have millions of people hours of usage behind them.
 
+## String wrangling
+
+The good news is that the GNU Gettext tools only have to be installed on the machine where the L10n wrangler is going to do that work. This can be an automated process, or the work of an individual.
+
+The following tasks are done in this phase
+
+* First time extraction of strings from the software
+* Extracting new, changed, or detecting deleted strings in later releases
+* Preparing the PO files for hand off to localizers
+* Resolving conflicts and marking strings which have changed or been deleted
+
+Developers won't need these tools on their machines and the runtime Node.js system can be blissfully ignorant of them, but `msginit`, `xgettext`, `msgfmt` and other GNU Gettext tools are a powerful way to manage catalogs of strings.
+
 ## Node.js modules
 Now that we understand the technical requirements of our Node.js app, let's look at how this was done for Mozilla Persona.
 
@@ -269,3 +282,27 @@ The i18n-abide module looks at the `Accept-Language`
 How does one test that their site is ready for localizers? We've created a node module called `gobbledygook` which ...
 
 [1] You could use variable names or something else, instead of the actual copy. Then you'd "localize" the English version, just like any other locale. This is not how it is done for Mozilla web services.
+
+## Beyond Node.js
+
+Many important aspects of Internationalization and Localization are things you should be aware of regardless of the programming language or framework.
+
+It is important to work L10n into most phases of software development. When your designers have mockups, have a L10n guru review them.
+
+A design should support Right to Left layout, instead of only a Left to Right composition. If you have a large call to action block on the left side of a page and other secondary blocks of content to support it... Then in Hebrew and other RTL languages, you'll want the layout mirrored, so that the call to action has the same impact. Some clever CSS can take advantage of the `dir` HTML attribute.
+
+Images with text in them are expensive and problematic. An image or any container needs to be bulletproof. Idiomatic English might look great in that trendy faux sticker, but then adding the same content in German may not be possible as 4 letters have become 14.
+
+Just like designers learned with data driven websites, where layouts and elements are filled with different content from the database... Designers often have to re-learn that even static elements like Banners and promotional links will vary in size.
+
+Getting to clever with a design can add expense, especially if an asset is manually created for each locale. This doesn't scale and can slow down your deployment.
+
+In addition to a code review, have developers or L10n team members review code regularly for proper use of Gettext. In addition to words, numbers and dates require special care. Everyone in the world doesn't format 5,000 like 5,000. Nor do they do that on Jan 5th, 2013.
+
+Reviews will catch these early, getting them into your string catalogs like PO files in the correct format. Correcting this in the middle of localization can be a nightmare, as you have to try to update N number of PO files with N L10n teams with members who often aren't comfortable with version control.
+
+Many teams have a code freeze to control quality and schedules. Similarly you need you developers and copy writers to coordinate with your L10n team. You should have a string freeze and plan on giving L10n enough time to do their work. Luckily, this can often overlap wtih your QA and Security testing.
+
+Just like a code freeze, only exceptional situations should change copy in the app before pushing to production.
+
+Continuous deployment for localized applications is not a solved problem. It  is much easier to do scheduled deployments with L10n time backed in. You may have to wait until the slowest L10n team is done before deploying to production.
