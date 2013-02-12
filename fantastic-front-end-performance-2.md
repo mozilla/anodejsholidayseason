@@ -1,5 +1,4 @@
-
-# Intro
+> This is episode 6, out of a total 12, in the [A Node.JS Holiday Season series](https://hacks.mozilla.org/category/a-node-js-holiday-season/) from Mozilla’s Identity team. It’s the second post about achieving better front-end performance.
 
 Last time, we introduced some common tactics used to optimize website performance. This time, we're going to look at how to measure your performance optimizations to see if they're working. We'll introduce some simple tools for measuring changes and simple statistics for validating data, and then we'll use those tools to measure the performance impact of adding HTTP caching.
 
