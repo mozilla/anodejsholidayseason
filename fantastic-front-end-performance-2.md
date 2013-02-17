@@ -20,7 +20,7 @@ This article introduces [etagify](https://github.com/lloyd/connect-etagify), a C
 
 Read on to learn more about etagify: how it works, when to use it, when not to use it, and how to measure your results.
 
-### How etagify works
+## How etagify works
 
 By focusing on a single, concrete use case, etagify gets the job done in just a hundred lines of code (including documentation). Let's take a look at the fifteen lines that cover the basics, leaving out edge cases around Vary header handling.
 
