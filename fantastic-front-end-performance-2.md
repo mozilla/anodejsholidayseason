@@ -73,7 +73,7 @@ Next, here's how we check against the cache. Again, comments inline.
 
 ### When (and when not) to use etagify
 
-Etagify's approach is super simple, and it's a great solution for dynamically-generated pages that don't change while the server is running, like i18n static pages. However, etagify has some gotchas when dealing with other common user cases:
+Etagify's approach is super simple, and it's a great solution for dynamically-generated pages that don't change while the server is running, like i18n static pages. However, etagify has some gotchas when dealing with other common use cases:
 
 * if pages change after being first cached, users will always see the stale, cached version
 * if pages are personalized for each user, two things could happen:
