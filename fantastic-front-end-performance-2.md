@@ -89,7 +89,7 @@ After gathering raw data, we did some quick statistics to see how much etagify i
 
 Surprisingly, we found that **etagify reduced load time by 9%**, from 1.65 (SD = 0.19) to 1.50 (SD = 0.13) seconds. That's a serious gain for almost no work.
 
-Next, we used the [t-test](http://en.wikipedia.org/wiki/Student%27s_t-test) to check that the improvement really was caused by adding etagify, and wasn't caused by random noise in our measurements. Our [p-value](http://en.wikipedia.org/wiki/P-value) was less than 0.01, meaning less than 1% chance that randomness caused the apparent improvement. So, yeah, the faster load time was statistically significant.
+Next, we used the [t-test](http://en.wikipedia.org/wiki/Student%27s_t-test) to check the odds that the improvement could be observed without adding etagify at all. Our [p-value](http://en.wikipedia.org/wiki/P-value) was less than 0.01, meaning less than 1% chance that randomness could have caused the apparent improvement. We can conclude that the measured improvement is statistically significant.
 
 Here's a chart of the averaged before and after data:
 
