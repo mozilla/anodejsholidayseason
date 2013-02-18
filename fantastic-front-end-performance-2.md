@@ -1,4 +1,4 @@
-# Fantastic front-end performance, part 2: generate ETags on the fly with etagify
+# Fantastic front-end performance, part 2: caching dynamically-generated content with etagify
 
 ## How do you cache your internationalized templates?
 
