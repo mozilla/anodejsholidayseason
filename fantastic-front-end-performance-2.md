@@ -63,8 +63,8 @@ Next, here's how we check against the cache. Again, comments inline.
         // check if the If-None-Match and ETags are equal
         if (!connect.utils.modified(req, res)) {
 
-          // yay cache hit! browser's version matches cached version.
-          // strip out that ETag and bail with a 304 Not Modified.
+          // cache hit! browser's version matches cached version.
+          // strip out that ETag & bail with a 304 Not Modified.
           res.removeHeader('ETag');
           return connect.utils.notModified(res);        
         }
