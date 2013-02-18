@@ -1,4 +1,4 @@
-# Fantastic front-end performance, part 2: caching dynamically-generated content with etagify
+# Fantastic front-end performance, part 2: caching dynamic content with etagify
 
 You might know that [Connect](https://github.com/senchalabs/connect) puts [ETags](http://en.wikipedia.org/wiki/HTTP_ETag) on static content, but not dynamic content. Unfortunately, if you dynamically generate i18n versions of static pages, those pages don't get caching headers at all--unless you add a build step to pregenerate all pages in all languages. What a lame chore.
 
