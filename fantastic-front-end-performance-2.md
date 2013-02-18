@@ -1,8 +1,6 @@
 # Fantastic front-end performance, part 2: caching dynamically-generated content with etagify
 
-## How do you cache your internationalized templates?
-
-You might know that [Connect](https://github.com/senchalabs/connect) puts [ETags](https://gist.github.com/6a68/4971859) on static content, but not dynamic content. Unfortunately, if you dynamically generate i18n versions of static pages, those pages don't get caching headers at all--unless you add a build step to pregenerate all pages in all languages. What a lame chore.
+You might know that [Connect](https://github.com/senchalabs/connect) puts [ETags](http://en.wikipedia.org/wiki/HTTP_ETag) on static content, but not dynamic content. Unfortunately, if you dynamically generate i18n versions of static pages, those pages don't get caching headers at all--unless you add a build step to pregenerate all pages in all languages. What a lame chore.
 
 This article introduces [etagify](https://github.com/lloyd/connect-etagify), a Connect middleware that generates ETags on the fly by md5-ing outgoing response bodies, storing the hashes in memory. Etagify lets you skip the build step, improves performance more than you might think (we measured a 9% load time improvement in our tests), and it's super easy to use:
 
@@ -19,9 +17,11 @@ This article introduces [etagify](https://github.com/lloyd/connect-etagify), a C
 
 Read on to learn more about etagify: how it works, when to use it, when not to use it, and how to measure your results.
 
+(Need a refresher on ETags and HTTP caching? We've put together a [cheat sheet](https://gist.github.com/6a68/4971859) to get you back up to speed.)
+
 ## How etagify works
 
-By focusing on a single, concrete use case, etagify gets the job done in just a hundred lines of code (including documentation). Let's take a look at the fifteen lines that cover the basics, leaving out ```Vary``` header handling edge cases.
+By focusing on a single, concrete use case, etagify gets the job done in just a hundred lines of code (including documentation). Let's take a look at the fifteen lines that cover the basics, leaving out Vary header handling edge cases.
 
 There are two parts to consider: hashing outgoing responses & caching the hashes; checking the cache against incoming conditional GETs.
 
