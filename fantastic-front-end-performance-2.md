@@ -21,7 +21,7 @@ Read on to learn more about etagify: how it works, when to use it, when not to u
 
 ## How etagify works
 
-By focusing on a single, concrete use case, etagify gets the job done in just a hundred lines of code (including documentation). Let's take a look at the fifteen lines that cover the basics, leaving out edge cases around Vary header handling.
+By focusing on a single, concrete use case, etagify gets the job done in just a hundred lines of code (including documentation). Let's take a look at the fifteen lines that cover the basics, leaving out ```Vary``` header handling edge cases.
 
 There are two parts to consider: hashing outgoing responses & caching the hashes; checking the cache against incoming conditional GETs.
 
@@ -50,27 +50,30 @@ First, here's where we add to the cache. Comments inline.
 
 Next, here's how we check against the cache. Again, comments inline.
 
-    var cached = etags[req.path]['md5'];
-    
-    // always add the ETag if we have it
-    if (cached) { res.setHeader('ETag', '"' + cached + '"' }
+    // the etagify middleware
+    return function(req, res, next) {
+      var cached = etags[req.path]['md5'];
+      
+      // always add the ETag if we have it
+      if (cached) { res.setHeader('ETag', '"' + cached + '"' }
 
-    // if the browser sent a conditional GET,
-    if (connect.utils.conditionalGET(req)) {
+      // if the browser sent a conditional GET,
+      if (connect.utils.conditionalGET(req)) {
 
-      // check if the If-None-Match and ETags are equal
-      if (!connect.utils.modified(req, res)) {
+        // check if the If-None-Match and ETags are equal
+        if (!connect.utils.modified(req, res)) {
 
-        // yay cache hit! browser's version matches cached version.
-        // strip out that ETag and bail with a 304 Not Modified.
-        res.removeHeader('ETag');
-        return connect.utils.notModified(res);        
+          // yay cache hit! browser's version matches cached version.
+          // strip out that ETag and bail with a 304 Not Modified.
+          res.removeHeader('ETag');
+          return connect.utils.notModified(res);        
+        }
       }
     }
 
 ### When (and when not) to use etagify
 
-Etagify's approach is super simple, and it's a great solution for dynamically-generated pages that don't change while the server is running, like i18n static pages. However, other common cases wouldn't be a good fit:
+Etagify's approach is super simple, and it's a great solution for dynamically-generated pages that don't change while the server is running, like i18n static pages. However, etagify has some gotchas when dealing with other common user cases:
 
 * if pages change after being first cached, users will always see the stale, cached version
 * if pages are personalized for each user, two things could happen:
