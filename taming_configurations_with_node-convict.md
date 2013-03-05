@@ -1,7 +1,9 @@
 Taming Configurations with node-convict
 =====
 
-In this installment of "A Node.JS Holiday Season" series we'll take a look at [`node-convict`](https://github.com/lloyd/node-convict), a tool that helps manage the configuration of node.js applications.
+In this installment of "A Node.JS Holiday Season" series we'll take a look at [`node-convict`](https://github.com/lloyd/node-convict), a tool that helps manage the configuration of node.js applications. It provides transparent defaults and built-in typing to make errors easier to find and debug.
+
+# The Problem
 
 There are two main concerns regarding application configuration:
 
@@ -75,7 +77,7 @@ With convict, the example from above becomes:
 
 The information is more or less the same, but encoded in the schema. Since all of the information is encoded in the schema, we can export it and display it in an easier to read format, and we can use it for validation. This declarative approach is what helps convict be more robust and collaborator friendly.
 
-# What's in a schema
+# What's in a Schema
  You'll notice four possible properties for each setting – each aiding in our goal of a more robust and easily digestible configuration.
 
 * **Type information**: the `format` property specifies either a built-in convict format (`ipaddress`, `port`, `int`, etc.), or it can be a function to check a custom format. During validation, if a format check fails it will be added to the error report.
@@ -83,7 +85,7 @@ The information is more or less the same, but encoded in the schema. Since all o
 * **Environmental variables**: If the variable specified by `env` has a value, it will overwrite the setting's default value.
 * **Documentation**: The `doc` property is pretty self-explanatory. The nice part about having it in the schema rather than as a comment is that we can call `conf.toSchemaString()` and have it displayed in the output.
 
-# Layering additional configurations
+# Layering Additional Configurations
 The set of defaults becomes a base configuration on top of which you can overlay additional configurations, using `conf.load` and `conf.loadFile`. For example, you could conditionally overlay a JavaScript object with settings for a specific environment:
 
 
