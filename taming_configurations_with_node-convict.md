@@ -1,14 +1,14 @@
 Taming Configurations with node-convict
 =====
 
-In this installment of "A Node.JS Holiday Season" series we'll take a look at [`node-convict`](https://github.com/lloyd/node-convict), a tool to help manage the configuration of node.js applications.
+In this installment of "A Node.JS Holiday Season" series we'll take a look at [`node-convict`](https://github.com/lloyd/node-convict), a tool that helps manage the configuration of node.js applications.
 
 There are two main concerns regarding application configuration:
 
 * Most applications will have at least a few different deployment environments, each with their own configuration needs.
 * Including credentials and sensitive information in source can be problematic.
 
-These concerns can be addressed by initializing certain settings based on the environment, and using environmental variables for more sensitive settings. A common pattern used by node.js developers is to create a module that exports the configuration, e.g.:
+These concerns could be addressed by initializing certain settings based on the environment, and using environmental variables for more sensitive settings. A common pattern used by node.js developers is to create a module that exports the configuration, e.g.:
 
     var conf = {
       // the application environment
@@ -24,8 +24,6 @@ These concerns can be addressed by initializing certain settings based on the en
       // database settings
       database: {
         host: process.env.DB_HOST || "localhost:8091",
-        user: process.env.DB_USER || "Administrator",
-        password: process.env.DB_PASSWORD || "password"
       }
     };
 
@@ -36,9 +34,9 @@ This works well enough, but there are additional concerns:
 * **What if a setting was configured incorrectly?** We can save headaches by detecting and reporting misconfigurations as early as possible.
 * **How easily is it understood** by Ops/QA/and other collaborators that may need to adjust settings or diagnose issues? A more declarative format that also embeds documentation can make lives easier.
 
-Convict addresses these additional concerns by introducing a **configuration schema** where you can set **type information, default values, environmental variables, and documentation** for each setting.
-
 # Enter convict
+
+Convict addresses these additional concerns by introducing a **configuration schema** where you can set **type information, default values, environmental variables, and documentation** for each setting.
 
 With convict, the example from above becomes:
 
@@ -67,14 +65,6 @@ With convict, the example from above becomes:
         host: {
           default: "localhost:8091",
           env: "DB_HOST"
-        },
-        user: {
-          default: "Administrator",
-          env: "DB_USER"
-        },
-        password: {
-          default: "password",
-          env: "DB_PASSWORD"
         }
       }
     });
@@ -83,7 +73,7 @@ With convict, the example from above becomes:
 
     module.exports = conf;
 
-The information is more or less the same, but encoded in the schema. Since all of the information is encoded in the schema, we can export it and display it in an easier to read format, and we can use it for validation. This declarative approach is what helps convict be more robust and collaborator friendly. 
+The information is more or less the same, but encoded in the schema. Since all of the information is encoded in the schema, we can export it and display it in an easier to read format, and we can use it for validation. This declarative approach is what helps convict be more robust and collaborator friendly.
 
 # What's in a schema
  You'll notice four possible properties for each setting – each aiding in our goal of a more robust and easily digestible configuration.
@@ -120,11 +110,18 @@ Alternatively, if you create a separate configuration file for each environment,
 
     conf.loadFile('./config/' + conf.get('env') + '.json');
 
-Layering configurations with `load` and `loadFile` is useful if you have common settings for specific environments that don't *need* to be set in environmental variables. Having separate, declarative JSON configurations can provide greater visibility of which settings should change between environments. And the files are loaded with [cjson](https://github.com/kof/node-cjson), so they may contain as many comments as you want for additional clarification. Also note that **environmental variables always take precedent**, even after settings have been loaded using `load` or `loadFile`. To see what the current settings look like, you can serialize the whole thing using `conf.toString()`.
+`loadFile` can also load multiple files at once, by passing in an array:
 
-# More on formats
+    // CONFIG_FILES=/path/to/production.json,/path/to/secrets.json,/path/to/sitespecific.json
+    conf.loadFile(process.env.CONFIG_FILES.split(','));
 
-Once the settings have been composed, you can check that each setting's value conforms to the correct format, as defined in the schema. Convict provides a few built-in formats such as `"url"`, `"ports"`, and `"ipaddress"`, among others, and you may use one of JavaScript's global constructors (e.g. `Number`) to designate a type. If you leave the `format` property out entirely, convict will check that the setting has the same type as the default value (according to [`Object.prototype.toString.call`](http://perfectionkills.com/instanceof-considered-harmful-or-how-to-write-a-robust-isarray/)). For instance, the following three schemas are equivalent:
+Layering configurations with `load` and `loadFile` is useful if you have common settings for specific environments that don't *need* to be set in environmental variables. Having separate, declarative JSON configurations can provide greater visibility of which settings should change between environments. And the files are loaded with [cjson](https://github.com/kof/node-cjson), so they may contain as many comments as you want for additional clarification.
+
+Also note that **environmental variables always take precedent**, even after settings have been loaded using `load` or `loadFile`. To see what the current settings look like, you can serialize the whole thing using `conf.toString()`.
+
+# V for Validation
+
+Once the settings have been composed, you can perform validation to check that each setting's value conforms to the correct format, as defined in the schema. Convict provides a few built-in formats such as `"url"`, `"ports"`, and `"ipaddress"`, among others, and you may use one of JavaScript's global constructors (e.g. `Number`) to designate a type. If you leave the `format` property out entirely, convict will check that the setting has the same type as the default value (according to [`Object.prototype.toString.call`](http://perfectionkills.com/instanceof-considered-harmful-or-how-to-write-a-robust-isarray/)). For instance, the following three schemas are equivalent:
 
     var conf1 = convict({
         name: {
@@ -146,7 +143,9 @@ Once the settings have been composed, you can check that each setting's value co
         name: 'Brendan'
       });
 
-In place of a built-in type, you can also provide your own format checking function. For example:
+Additionally, there is an enum-style format as seen in the examples, in which you can specify an explicit set of acceptable values, e.g. `["production", "development", "test"]`. Any value not in the list will fail validation.
+
+In place of a built-in type, you can also provide your own format checking function. For example, the format function in this schema checks that the setting is a 64 character hex string:
 
     var check = require('validator').check;
 
@@ -154,21 +153,18 @@ In place of a built-in type, you can also provide your own format checking funct
         key: {
           doc: "API key",
           format: function (val) {
-            check(val, 'should be a 64 character hex key').regex(/[a-fA-F0-9]{64}/);
+            check(val, 'should be a 64 character hex key').regex(/^[a-fA-F0-9]{64}$/);
           },
           default: '3cec609c9bc601c047af917a544645c50caf8cd606806b4e0a23312441014deb'
         }
       });
 
-Additionally, there is an enum-style format as seen in the examples, where you can specify an explicit set of acceptable values, e.g. `["production", "development", "test"]`. Any value not in the list will fail validation.
-
-## V for Validation
-Calling `conf.validate()` will throw an error with details on each setting that failed to validate, if there were any. This is important for avoiding redeployment after each individual configuration error. Using the configuration  from the custom key format example, here's what an error would look like:
+Calling `conf.validate()` will throw an error with details on each setting that failed to validate, if there were any. This is important for avoiding redeployment after each individual configuration error. Using the configuration from the custom key format example, here's what an error would look like:
 
     conf.set('key', 'foo');
     conf.validate();
-    // throws Error: key: should be a 64 character hex key: value was "foo"
+    // Error: key: should be a 64 character hex key: value was "foo"
 
 
 # Conclusion
-Convict expounds on the standard pattern of configuring node.js applications in a way that is more robust and accessible to collaborators, who may have less interest in digging through imperative code in order to inspect or modify settings. With the configuration schema, we can give project collaborators more **context** on each setting as well as provide **validation and early failures** when configuration goes wrong.
+Convict expands on the standard pattern of configuring node.js applications in a way that is more robust and accessible to collaborators, who may have less interest in digging through imperative code in order to inspect or modify settings. With the configuration schema, we can give project collaborators more **context** on each setting as well as provide **validation and early failures** when configuration goes wrong.
