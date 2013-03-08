@@ -1,20 +1,49 @@
 
 Outline
 
-1) i18n-abide, gettext
-tutorial style walkthrough of i18n-abide ifying a site?
+9. "Localizing your node.js service, part 1" -
+* Ready to take your web-app worldwide?
+* The first step is to translate it!  This post will present a basic workflow for you can translate your project.  We'll apply the
+* gettext() toolchain to a web application and present
+* new pure-javascript tools that facilitate the workflow.
 
-2) community and tools
+10. "Localizing your node.js service, part 2" - Here we present
+* i18n middleware that helps you with the task of speaking your user's language - taking the
+* Language-Accept header and matching it to the set of languages you support.  We'll also discuss how
+* substitution can be performed based on this in server and client side code.
 
-jsxgettext
-po2json
+11. "Localizing your node.js service, part 3" - Finally, we'll talk about
+* debugging the i18n implementation of your system.  We present
+* gobbledygook, a small library that helps you visually confirm the correctness of your i18n implementation.
+
+-------
+Outline AOK
+
+1) How to localize your node.js service
+(i18n-abide, gettext)
+* We wrote some modules
+* tutorial style walkthrough of i18n-abide ifying a site?
+*
+
+2) Localization community, tools, and ...
+* Intro - dev work done, l10n work begins
+* Explain Gettext
+* Explain PO files
+* Mention SVN
+* String Wrangling (providing our strings to lcoalizers)
+* jsxgettext
+* Using our strings
+* po2json
+
+3)  L10n in action, going deeper
+* intro
+* gobbdegook
+
 history
-
-3) Deep
 
 middleware - accept language matching
 format
-gobbdegook
+
 skipping po files
 
 4) Beyond Node
@@ -27,7 +56,9 @@ BIDI
 
 
 # How to Localize Your Node.js service
-
+[Start with Conclusion... explain goals]
+[Show what we did]
+[Explain in detail why]
 ## What is localization?
 
 The products and services which Mozilla provides are localized into as many as 90 languages! Localizing a website or native app involves translating copy, adding/removing/tweaking components to fit with cultural norms, as well as matching the technical differences of region or language.
@@ -35,22 +66,29 @@ The products and services which Mozilla provides are localized into as many as 9
 The following are just a few examples of localization:
 * Providing copy translated into a specific regional variation of a language
 * Rendering a screen right to left for a given language
-* Bullet proofing designs to accomodate more or less text
+* Bulletproofing designs to accomodate more or less text
 * Naming things or providing graphics that resonate with a local audience
 
 In this series of posts, I'm going to cover some technical aspects of how to localize a Node.js service, as well as some more general techniques that work regardless of the technology.
 
 I'll be using the terms L10n (<b>L</b>ocalizatio<b>n</b>) and <b>I</b>nternationalizatio<b>n</b>, becuase we love our acronyms, right?
+[This is basically an intro to the series with too much copy]
 
 ## i18n-abide
 
-The Mozilla Persona service is a Node.js based service localized into X locales. To accomplish this, it uses the following modules
+Mozilla Persona is a Node.js based service localized into X locales. To accomplish this, it uses the following modules
 
 * i18n-abide
 * jsxgettext
 * gobbledygook
 
-i18n-abide is the most important module from a developer's perspective. Let's walk through adding it to your service.
+### Goals
+We created these modules, to meet the following goals
+* Work well with existing Mozilla L10n community
+* Pure JS toolkit
+
+i18n-abide is the main module you'll use to integrate translations into your own service.
+Let's walk through how to add it.
 
 For the sake of examples, we'll assume an Express website and EJS templates.
 
@@ -74,17 +112,21 @@ The i18n `abide` middleware sets up request processing and injects various funct
 
 The key thing abide does, is it injects into the Node and express framework references to `Gettext` functions. This allows you to reference gettext strings in Node JavaScript code or in your HTML templates.
 
-Here is an example in a template file:
+Here is an example template file:
 
     <html lang="{{LANG}}" dir="{{DIR}}">
       <head>
         <title>{{gettext('Mozilla Persona')}}</title>
 
-Abide provides `LANG`, `DIR`, and `gettext`. `LANG` is the language code based on the user's browser and preferred language settings. `DIR` is for [bidirectional text](http://en.wikipedia.org/wiki/Bi-directional_text) support.
+Abide provides various variables and funcitons, such as `LANG`, `DIR`, and `gettext`.
+
+`LANG` is the language code based on the user's browser and preferred language settings.
+
+`DIR` is for [bidirectional text](http://en.wikipedia.org/wiki/Bi-directional_text) support.
 
 `gettext` is a JS function which will take an English string and return a localize string, again based on the user's preferred region and language.
 
-Here is an example in a JavaScript file:
+Here is an example JavaScript file:
 
     app.get('/', function(req, res) {
         res.render('homepage', {
@@ -98,16 +140,30 @@ At runtime, the `i18n-abide` module will detect the user's prefered locale and o
 
 So to setup our site for localization, we must look through all of our code and templates and wrap strings in calls to gettext.
 
+[Look through i18n-abide tutorial, any other steps?]
+
+In our next post, we'll look at how strings like "Hello, World!" are extracted, translated, and prepared for use by our service.
+
+Stay tuned...
+
 -----------------------
 
 # Localization community, tools, and ...
 
+In our previous post localizing Node.js services, we learned how to add i18n-abide to our service.
+
+We wrapped strings in templates files as well as JavaScript files with calls to a function `gettext`. As developers, our work ends there. But the work of getting our copy localized has just begun.
+
+We've built out a Node.js toolchain for localizing all these strings.
+
 ## The toolchain
 
-Mozilla is over a decade old. It's had one of the bigest (and coolest) l10n communities in Open Source. As a result, it has many tools and the lowest levels are traditional tools.
+A goal for Mozilla Persona's Node code is to be compatible with the larger Mozilla community, while being Node friendly and flexible.
+
+Mozilla is over a decade old. It's had one of the bigest (and coolest) l10n communities in Open Source. As a result, it has many tools and the lowest levels are old crotchety tools.
 
 ### Gettext
-GNU Gettext is a toolchain that allows you to extract Copy from your Node.js code. These are called Strings (after the C name for ... strings). When you write your Node.js code and templates, you put English Strings<sup>[1]</sup> in like normal, but you wrap them in a functional call to gettext.
+GNU Gettext is a toolchain that allows you to extract Copy and other Strings from webapps or native apps. These are called Strings (after the C name for ... strings). When you write your Node.js code and templates, you put English Strings<sup>[1]</sup> in like normal, but you wrap them in a functional call to gettext.
 
 This does a few different things for you:
 * As a build step, you can extract all the strings
@@ -115,15 +171,30 @@ This does a few different things for you:
 
 All strings end up in text files that end with the `.po` file suffix. I'll refer to these as PO files.
 
+### PO Files
+
+These are plain text files with a specific format that the Gettext tools can read, write, and merge.
+
+An example snippet of a PO file named zh_TW/LC_MESSAGES/messages.po:
+
+    #: resources/views/about.ejs:46
+    msgid "Persona preserves your privacy"
+    msgstr "Persona 保護您的隱私"
+
+We'll examine this in more detail below, but we can see that `msgid` is the English string and `msgstr` has the Chinese translation. There are comments in the file for where in the codebase the string is used.
+
 There are many other tools that Gettext provides, for managing strings, PO files, etc. We'll cover these in a bit.
 
 ### SVN
 [Can we get away with not mentioning SVN?]
 Mozilla manages it's PO files for various projects with SVN. Mozilla is no stranger to git and other modern version control systems, but SVN is required within the L10n Community.
 
-Of course you don't have to use SVN with your Node.js service. It's mentioned here as we'll see it pop up later.
+**Of course you don't have to use SVN** with your Node.js service. It's mentioned here as we'll see it pop up later.
 
-## Why this toolchain?
+So our basic constraint is to create a solution that uses `PO` files, which is what our localizers will deliver via SVN.
+
+## Why a new toolchain?
+[Delete? or put in Going Deep?]
 Before we get into the Node modules that make working with Gettext easy, we must ask ourselves... why this toolchain?
 
 A year ago I did a deep survey of all the Node l10n and i18n modules. They all "reinvent the wheel", creating their own JSON based formats for storing strings.
@@ -144,9 +215,11 @@ Proper localization is hard! You better have an API that supports proper transla
 
 That said, you can always go with a newer, more modern setup and add the missing features paper cut by paper cut. Just, please, look at Gettext and other older systems for API inspiration. They have millions of people hours of usage behind them.
 
-## String wrangling
+## Providing PO Files to localizers
 
-The good news is that the GNU Gettext tools only have to be installed on the machine where the L10n wrangler is going to do that work. This can be an automated process, or the work of an individual.
+So our code is marked up with `gettext` calls. Now what? Get thee a String wrangler. This can be you, an L10n person, or a build system guru.
+
+This may sound complicated, but the good news is that only the String wrangler has to worry about this peice. This can be an automated process, or the work of an individual.
 
 The following tasks are done in this phase
 
@@ -157,54 +230,11 @@ The following tasks are done in this phase
 
 Developers won't need these tools on their machines and the runtime Node.js system can be blissfully ignorant of them, but `msginit`, `xgettext`, `msgfmt` and other GNU Gettext tools are a powerful way to manage catalogs of strings.
 
-## Node.js modules
-Now that we understand the technical requirements of our Node.js app, let's look at how this was done for Mozilla Persona.
-
-### po2json
-
-Our strings are in PO files, typically in a file system like this:
-
-    locale
-      en
-        LC_MESSAGES
-          messages.po
-      de
-        LC_MESSAGES
-          messages.po
-      pt_BR
-        LC_MESSAGES
-          messages.po
-
-We need a way to get strings into our app at runtime. There are a few ways you can do this.
-
-The first way, for server side strings, is to use the fine node-gettext module. We launched with this module and it's quite efficient for doing server side translation.
-
-The second way, is to have a build step which creates JSON language files out of our PO files. We've switched to this method for all our strings, because we had to support this for client side translation, which make up the majority of our string usage.
-
-Our build script is called `po2json.js`.
-
-Example:
-
-    $ locale/po2json.js static/i18n locale
-    ...
-
-And we get a file structure like:
-
-    static
-      i18n
-        en
-          messages.json
-        de
-          messages.json
-        pt_BR
-          messages.json
-
+[Explain the steps]
 
 ### jsxgettext
 
 So how do we create these PO files? You can use traditional GNU Gettext utilities, but we've also written a Node module `jsxgettext`, which is a nice cross platform way to go.
-
-Another wrinkle is that GNU Gettext doesn't know how to parse JavaScript or various flavors of Node templating languages. With `jsxgettext`, we can do a better job here.
 
 jsxgettext parses your source files looking for uses of Gettext functions, and then it extracts just the string part. It then formats a PO file, which is compatible with any other Gettext tool.
 
@@ -249,7 +279,98 @@ You can [view the complete zh_TW PO file](http://svn.mozilla.org/projects/l10n-m
 
 I won't go into all the details, but it is always a good idea to talk to the localizers before you start. If they use the Gettext tool chains, you'll probably start with a PO file tempalte (a .POT file) and then generate the various locale PO files from that.
 
+
+[Should we start part 3 here?]
+
+## Using Our Strings
+
+So first we developed, then our L10n team did some string wrangling, now we've got several locales with translated strings...
+
+Now that our strings are in PO files, typically in a file system like this:
+
+    locale
+      en
+        LC_MESSAGES
+          messages.po
+      de
+        LC_MESSAGES
+          messages.po
+      pt_BR
+        LC_MESSAGES
+          messages.po
+
+We need a way to get strings into our app at runtime. There are a few ways you can do this.
+
+The first way, is to have server side strings and use the `gettext` function provided by `i18n-abide` as we saw in the first blog post.
+
+The second way, is to have a build step which creates JSON language files out of our PO files. We've switched to this method for all our strings, because we had to support this for client side translation, which make up the majority of our string usage.
+
+**Both of these methods require** the strings to be in a **JSON** file format. The server side translation loads them on app startup, and the client side translation loads them via HTTP (or you can put them into your built and minified JavaScript).
+
+Since this system is compatible with GNU Gettext, a third option for server side strings is to use node-gettext. It's quite efficient for doing server side translation.
+
+So, how do we get our strings from PO into JSON files?
+
+### po2json
+
+Our build script is called `po2json.js`.
+
+Example:
+
+    $ locale/po2json.js static/i18n locale
+    ...
+
+And we get a file structure like:
+
+    static
+      i18n
+        en
+          messages.json
+        de
+          messages.json
+        pt_BR
+          messages.json
+
 Wow, we've covered a lot of ground. Let's look at some deeper details...
+
+-----------
+
+# i18n-abide in Action, going deeper
+
+In the previous installment, we learned how the L10n wrangler would help us get our website localized. In ... we added the necissary code.
+
+Now, let's see it in action.
+
+### gobbledygook
+
+If you want to test your L10n setup, before you have real translations done, we're built a great testing locale. It is inspired by David Bowie's Labrythn.
+
+To use it, just do
+[TODO]
+
+You can enable your real locales one by one with this same config.
+
+## Start you engines
+
+    npm start
+
+In your web browser, change your preferred language.
+
+Screenshot 1
+Screenshot 2
+
+
+
+## Going Deeper
+We've just scratched the surface of i18n and l10n. If you ship a Node.js in multiple locales, you'll find many gotchas and interesting nuances.
+
+Here is a heads up on a few:
+
+## Extracting Strings
+
+Another wrinkle is that GNU Gettext doesn't know how to parse JavaScript or various flavors of Node templating languages. With `jsxgettext`, we can do a better job here.
+
+If you do want to use xgettext, you'll want to parse JavaScript files as Perl and EJS files as PHP. See, I told you it was gnarly! Use jsxgettext instead.
 
 ## Format, gettext, ngettext
 
@@ -276,6 +397,8 @@ What... so how do we know what the user's preferred language is?
 The i18n-abide module looks at the `Accept-Language`
 ...
 
+
+# Going Deep
 
 ## Bells and Whistles
 
@@ -305,4 +428,4 @@ Many teams have a code freeze to control quality and schedules. Similarly you ne
 
 Just like a code freeze, only exceptional situations should change copy in the app before pushing to production.
 
-Continuous deployment for localized applications is not a solved problem. It  is much easier to do scheduled deployments with L10n time backed in. You may have to wait until the slowest L10n team is done before deploying to production.
+Continuous deployment for localized applications is not a solved problem. It is much easier to do scheduled deployments with L10n time backed in. You may have to wait until the slowest L10n team is done before deploying to production.
