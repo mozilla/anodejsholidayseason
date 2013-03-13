@@ -98,6 +98,8 @@ Partial config showing `it-CH` is used in supported_languages and debug_lang.
 
 Now if you set your browser's preferred language to Italian/Switcherland, i18n-abide will use gobbledygook to localize the content.
 
+![](it-CH-chooser.png)
+
 This is a handy way to ensure your design and copy work for bi-directional languages like Hebrew, before you have the resources to support that community.
 
 ## Going Deeper
