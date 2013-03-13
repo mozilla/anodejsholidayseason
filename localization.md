@@ -23,7 +23,7 @@ Outline AOK
 (i18n-abide, gettext)
 * We wrote some modules
 * tutorial style walkthrough of i18n-abide ifying a site?
-*
+* ...
 
 2) Localization community, tools, and ...
 * Intro - dev work done, l10n work begins
@@ -32,11 +32,11 @@ Outline AOK
 * Mention SVN
 * String Wrangling (providing our strings to lcoalizers)
 * jsxgettext
-* Using our strings
-* po2json
 
 3)  L10n in action, going deeper
 * intro
+* Using our strings
+* po2json
 * gobbdegook
 * how middleware works with Accept-Language
 * missing features (language picker, url based locales)

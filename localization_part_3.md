@@ -1,3 +1,5 @@
+# Localization in action
+
 ## Using Our Strings
 
 So first we developed, then our L10n team did some string wrangling, now we've got several locales with translated strings...
@@ -23,7 +25,7 @@ The second way, is to have a build step which creates JSON language files out of
 
 **Both of these methods require** the strings to be in a **JSON** file format. The server side translation loads them on app startup, and the client side translation loads them via HTTP (or you can put them into your built and minified JavaScript).
 
-Since this system is compatible with GNU Gettext, a third option for server side strings is to use node-gettext. It's quite efficient for doing server side translation.
+Since this system is compatible with GNU Gettext, a third option for server side strings is to use [node-gettext](https://github.com/andris9/node-gettext). It's quite efficient for doing server side translation.
 
 So, how do we get our strings from PO into JSON files?
 
@@ -51,20 +53,25 @@ Wow, we've covered a lot of ground. Let's look at some deeper details...
 
 -----------
 
-# i18n-abide in Action, going deeper
 
-In the previous installment, we learned how the L10n wrangler would help us get our website localized. In ... we added the necissary code.
 
-Now, let's see it in action.
 
-### gobbledygook
+## Config
 
-If you want to test your L10n setup, before you have real translations done, we're built a great testing locale. It is inspired by David Bowie's Labrythn.
+`i18n-abide` requires some configuration to decide which languages are supported.
 
-To use it, just do
-[TODO]
+i18n-abide will do it's best to serve up an appropriate localized string. If it cannot, it will serve up the string you've put into your code and templates.
 
-You can enable your real locales one by one with this same config.
+As we saw in the first isntallment, here is the required configuration for our app
+
+    app.use(i18n.abide({
+      supported_languages: ['en-US', 'de', 'es', 'zh-TW'],
+      translation_directory: 'static/i18n'
+    }));
+
+This is an app that supports English, German, Spanish, Chinese (Traditional). The translated JSON files are under static/i18n.
+
+You don't need the .PO files to be deployed to production, but it doesn't hurt to ship them.
 
 ## Start you engines
 
@@ -74,6 +81,24 @@ In your web browser, change your preferred language.
 
 Screenshot 1
 Screenshot 2
+
+
+### gobbledygook
+
+If you want to **test** your L10n setup, **before you have real translations** done, we're built a great testing locale. It is inspired by David Bowie's Labrythn.
+
+To use it, just add `it-CH` or another locale you're not currently using to your config as the **debug** locale.
+
+Partial config showing `it-CH` is used in supported_languages and debug_lang.
+
+    app.use(i18n.abide({
+      supported_languages: ['en-US', 'de', 'es', 'zh-TW', 'it-CH'],
+      debug_lang: 'it-CH',
+      ...
+
+Now if you set your browser's preferred language to Italian/Switcherland, i18n-abide will use gobbledygook to localize the content.
+
+This is a handy way to ensure your design and copy work for bi-directional languages like Hebrew, before you have the resources to support that community.
 
 ## Going Deeper
 We've just scratched the surface of i18n and l10n. If you ship a Node.js in multiple locales, you'll find many gotchas and interesting nuances.

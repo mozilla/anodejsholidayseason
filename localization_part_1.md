@@ -34,11 +34,13 @@ We created these modules, to meet the following goals
 i18n-abide is the main module you'll use to integrate translations into your own service.
 Let's walk through how to add it.
 
-For the sake of examples, we'll assume an Express website and EJS templates.
+In these examples, we'll assume your code uses Express and EJS templates.
 
 ## Installation
 
     npm install i18n-abide
+
+## Preparing your codebase
 
 In your code
 
@@ -48,13 +50,16 @@ In your code
       supported_languages: ['en-US', 'de', 'es', 'zh-TW', 'it-CH'],
       default_lang: 'en-US',
       debug_lang: 'it-CH',
-      locale_directory: 'locale'
+      translation_directory: 'static/i18n'
     }));
-[TODO: locale_directory is this needed with .json files?]
+
+[TODO: translation_directory is this needed with .json files?]
 
 The i18n `abide` middleware sets up request processing and injects various functions we'll use for translation.
 
 The key thing abide does, is it injects into the Node and express framework references to `Gettext` functions. This allows you to reference gettext strings in Node JavaScript code or in your HTML templates.
+
+The next step is to work through all of your code where you have user visible strings.
 
 Here is an example template file:
 
@@ -80,9 +85,14 @@ Here is an example JavaScript file:
 
 We can see that these variables and functions are placed in the `req` object.
 
-At runtime, the `i18n-abide` module will detect the user's prefered locale and output "Hello, World!" localized to them.
 
 So to setup our site for localization, we must look through all of our code and templates and wrap strings in calls to gettext.
+
+## Language Detection
+
+[TODO... does this belong in part 3?]
+
+At runtime, the `i18n-abide` module will detect the user's prefered locale and output "Hello, World!" localized to them.
 
 [Look through i18n-abide tutorial, any other steps?]
 
