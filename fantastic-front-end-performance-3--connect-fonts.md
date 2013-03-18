@@ -98,7 +98,7 @@ Let's walk through the process of adding ```connect-fonts``` to serve the Open S
         var app = express.createServer(),
           tpl = fs.readFileSync(__dirname, '/tpl.ejs', 'utf8');
 
-3. Initialize the middleware.
+3. Initialize the middleware:
 
          // app.js continued
          // add this app.use call:
@@ -111,7 +111,7 @@ The arguments to ```connect_fonts.setup()``` include:
   * ```allow_origin```: the origin for which we serve fonts; ```connect-fonts``` uses this info to set the Access-Control-Allow-Origin header for browsers that need it (Firefox 3.5+, IE 9+)
   * ```ua``` (optional): a parameter listing the user-agents to which we'll serve fonts. By default, ```connect-fonts``` uses UA sniffing to only serve browsers font formats they can parse, reducing CSS size. ```ua: 'all'``` overrides this to serve all fonts to all browsers.
 
-4. Inside your route, pass the user's locale to the template
+4. Inside your route, pass the user's locale to the template:
 
         // app.js continued
         app.get('/time', function(req, res) {
@@ -122,7 +122,7 @@ The arguments to ```connect_fonts.setup()``` include:
           });
           res.send(output);
         });
-5. Detect the user's preferred language. Mozilla Persona uses [i18n-abide](https://github.com/mozilla/i18n-abide), and [locale](https://github.com/jed/locale) is another swell option; both are available via npm. For the sake of keeping this example short, we'll just grab the first two chars from the [Accept-Language header](https://developer.mozilla.org/en-US/docs/HTTP/Content_negotiation#The_Accept-Language.3A_header). 
+5. Detect the user's preferred language:
 
         // oversimplified locale detection
         function detectLocale(req) {
@@ -131,6 +131,8 @@ The arguments to ```connect_fonts.setup()``` include:
 
         app.listen(8765, '127.0.0.1');
         // end of app.js
+Mozilla Persona uses [i18n-abide](https://github.com/mozilla/i18n-abide), and [locale](https://github.com/jed/locale) is another swell option; both are available via npm. For the sake of keeping this example short, we'll just grab the first two chars from the [Accept-Language header](https://developer.mozilla.org/en-US/docs/HTTP/Content_negotiation#The_Accept-Language.3A_header). 
+
 
 ### Template changes
 
