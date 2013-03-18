@@ -1,6 +1,6 @@
 # Fantastic front end performance, part 3 - Serving smaller fonts for big performance wins - A Node.js holiday season, part 8
 
-We used font subsetting to reduce Persona's font footprint 85%, from 300 KB to 45 KB. This post outlines exactly how we implemented these performance improvements, and gives you tools to do the same.
+We reduced Persona's font footprint 85%, from 300 KB to 45 KB, using this one weird trick (font subsetting). This post outlines exactly how we implemented these performance improvements, and gives you tools to do the same.
 
 ## Introducing connect-fonts
 
