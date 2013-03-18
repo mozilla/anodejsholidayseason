@@ -75,7 +75,7 @@ with a super simple template:
     <!doctype html>
     <p>the time is <%= currentTime %>.
 
-Let's walk through the process of adding ```connect-fonts``` to serve the Open Sans font, one of [several](https://npmjs.org/browse/keyword/connect-fonts) ready-made font packs.
+Let's walk through the process of adding ```connect-fonts``` to serve the Open Sans font, one of [several](https://npmjs.org/browse/keyword/connect-fonts) ready-made font packs available via npm.
 
 ### App changes
 
