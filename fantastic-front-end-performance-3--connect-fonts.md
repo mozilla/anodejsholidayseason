@@ -1,6 +1,6 @@
 # Fantastic front end performance, part 3 - Big performance wins by serving fonts smarter - A Node.js holiday season, part 8
 
-In Persona we cut our page load times in half by serving fonts smarter.  This post outlines exactly how we implemented these performance wins, and gives you tools to do the same.
+We used font subsetting to reduce Persona's font footprint from 300 KB to 45 KB. This post outlines exactly how we implemented these performance improvements, and gives you tools to do the same.
 
 ## Introducing connect-fonts
 
@@ -180,7 +180,7 @@ We've covered a pre-made font pack, but it's easy to create your own font packs 
 
 ## Wrapping up
 
-If you self-host web fonts on a connect-based site, font subsetting can bring huge performance gains. If your site isn't yet internationalized, you can still use just your native subset. ```connect-fonts``` will still generate ```@font-face``` CSS and handle CORS headers for you, plus you'll have a smooth upgrade path to internationalize later.
+If you self-host web fonts on a Connect-based site, font subsetting can bring huge performance gains. If your site isn't yet internationalized, you can still use just your native subset. ```connect-fonts``` will still generate ```@font-face``` CSS and handle CORS headers for you, plus you'll have a smooth upgrade path to internationalize later.
 
 ### Future directions
 
