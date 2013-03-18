@@ -122,7 +122,7 @@ The arguments to ```connect_fonts.setup()``` include:
           });
           res.send(output);
         });
-5. Detect the user's preferred language:
+5. Detect the user's preferred language. Mozilla Persona uses [i18n-abide](https://github.com/mozilla/i18n-abide), and [locale](https://github.com/jed/locale) is another swell option; both are available via npm. For the sake of keeping this example short, we'll just grab the first two chars from the [Accept-Language header](https://developer.mozilla.org/en-US/docs/HTTP/Content_negotiation#The_Accept-Language.3A_header):
 
         // oversimplified locale detection
         function detectLocale(req) {
@@ -131,8 +131,6 @@ The arguments to ```connect_fonts.setup()``` include:
 
         app.listen(8765, '127.0.0.1');
         // end of app.js
-Mozilla Persona uses [i18n-abide](https://github.com/mozilla/i18n-abide), and [locale](https://github.com/jed/locale) is another swell option; both are available via npm. For the sake of keeping this example short, we'll just grab the first two chars from the [Accept-Language header](https://developer.mozilla.org/en-US/docs/HTTP/Content_negotiation#The_Accept-Language.3A_header). 
-
 
 ### Template changes
 
