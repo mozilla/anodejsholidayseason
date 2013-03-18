@@ -109,7 +109,7 @@ Let's walk through the process of adding ```connect-fonts``` to serve the Open S
 The arguments to ```connect_fonts.setup()``` include:
   * ```fonts```: an array of fonts to enable,
   * ```allow_origin```: the origin for which we serve fonts; ```connect-fonts``` uses this info to set the Access-Control-Allow-Origin header for browsers that need it (Firefox 3.5+, IE 9+)
-  * ```ua``` (optional): a parameter listing the user-agents to which we'll serve fonts. By default, ```connect-fonts``` uses UA sniffing to only serve browsers font formats they can parse. ```ua: 'all'``` overrides this to serve all fonts to all browsers.
+  * ```ua``` (optional): a parameter listing the user-agents to which we'll serve fonts. By default, ```connect-fonts``` uses UA sniffing to only serve browsers font formats they can parse, reducing CSS size. ```ua: 'all'``` overrides this to serve all fonts to all browsers.
 
 4. Inside your route, pass the user's locale to the template
 
