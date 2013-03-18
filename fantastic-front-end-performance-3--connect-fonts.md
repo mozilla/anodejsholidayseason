@@ -4,7 +4,7 @@ We used font subsetting to reduce Persona's font footprint 85%, from 300 KB to 4
 
 ## Introducing connect-fonts
 
-```connect-fonts``` is a Connect font-management middleware that improves ```@font-face``` performance by serving locale-specific subsetted font files, reducing downloaded font size up to 80%. It also generates locale/browser-specific ```@font-face``` CSS, and manages the CORS header required by Firefox and IE 9+. Subsetted fonts are served from a *font pack*--a directory tree of font subsets, plus a simple JSON config file. Some common open-source fonts are available in pregenerated font packs [on npm](https://npmjs.org/browse/keyword/connect-fonts), and creating your own font packs is straightforward.
+```connect-fonts``` is a Connect font-management middleware that improves ```@font-face``` performance by serving locale-specific subsetted font files, significantly reducing downloaded font size. It also generates locale/browser-specific ```@font-face``` CSS, and manages the CORS header required by Firefox and IE 9+. Subsetted fonts are served from a *font pack*--a directory tree of font subsets, plus a simple JSON config file. Some common open-source fonts are available in pregenerated font packs [on npm](https://npmjs.org/browse/keyword/connect-fonts), and creating your own font packs is straightforward.
 
 (Feeling lost? We've [put together](https://gist.github.com/6a68/5187976) a few references to good ```@font-face``` resources on the web.)
 
