@@ -180,7 +180,7 @@ We've covered a pre-made font pack, but it's easy to create your own font packs 
 
 ## Wrapping up
 
-If you self-host web fonts on a Connect-based site, font subsetting can bring huge performance gains. If your site isn't yet internationalized, you can still use just your native subset. ```connect-fonts``` will still generate ```@font-face``` CSS and handle CORS headers for you, plus you'll have a smooth upgrade path to internationalize later.
+Font subsetting can bring huge performance gains to sites that use web fonts; ```connect-fonts``` handles a lot of the complexity if you self-host fonts in an internationalized Connect app.  If your site isn't yet internationalized, you can still use ```connect-fonts``` to serve up your native subset, and it'll still generate ```@font-face``` CSS and any necessary CORS headers for you, plus you'll have a smooth upgrade path to internationalize later.
 
 ### Future directions
 
