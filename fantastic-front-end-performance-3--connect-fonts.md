@@ -15,7 +15,7 @@ When you are just serving one big font to all your users, there's not much invol
   * generate the full family of web fonts from your TTF or OTF file, then put them someplace the web server can access
   * add CORS headers to your web server if fonts are served from a separate domain, as Firefox and IE9+ enforce the same origin policy with fonts
 
-These steps are pretty easy to do; the awesome [FontSquirrel generator](http://www.fontsquirrel.com/tools/webfont-generator) can generate all the missing font files and the ```@font-face``` CSS declaration for you. You've still got to sit down with Nginx or Apache docs to figure out how to add the CORS header, but that's not too tough.
+These steps are pretty easy; the awesome [FontSquirrel generator](http://www.fontsquirrel.com/tools/webfont-generator) can generate all the missing font files and the ```@font-face``` CSS declaration for you. You've still got to sit down with Nginx or Apache docs to figure out how to add the CORS header, but that's not too tough.
 
 If you want to take advantage of font subsetting to hugely improve performance, things become more complex. You'll have font files for each supported locale, and will need to dynamically modify the ```@font-face``` CSS declaration to point at the right URL. CORS management is still needed. This is the problem ```connect-fonts``` solves.
 
