@@ -69,7 +69,7 @@ Suppose you've got a super simple express app that serves up the current time:
 
     app.listen(8765, '127.0.0.1');
 
-with a template like:
+with a super simple template:
 
     // tpl.ejs
     <!doctype html>
