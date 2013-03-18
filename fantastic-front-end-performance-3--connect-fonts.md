@@ -41,7 +41,7 @@ Smaller fonts mean faster load time and a shorter wait for styled text to appear
 
 Even after gzipping, you can reduce font size 80% by using the English subset of Open Sans (13 KB), instead of the full font (63 KB). Consider that this is the reduction for just one font file--most sites use several. The potential is huge!
 
-**Using ```connect-fonts```, Mozilla Persona's font footprint went from 300 KB to 45 KB, an 85% reduction.** This equates to several seconds of download time on a typical 3G connection.
+**Using ```connect-fonts```, Mozilla Persona's font footprint went from 300 KB to 45 KB, an 85% reduction.** This equates to several seconds of download time on a typical 3G connection, and up to 10 seconds on a typical 2G connection.
 
 ### Going further with optimizations
 
