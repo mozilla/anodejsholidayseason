@@ -178,29 +178,10 @@ That does it! Our little app is serving up stylish timestamps. This example code
 
 We've covered a pre-made font pack, but it's easy to create your own font packs for paid fonts. There are instructions on the ```connect-fonts``` [readme](https://github.com/shane-tomlinson/connect-fonts).
 
-## connect-fonts - when to use it & alternatives [todo remove this?]
-
-If you self-host web fonts on a connect-based site, font subsetting can bring huge performance gains. If your site isn't yet internationalized, you can still use just your native subset; connect-fonts will still generate ```@font-face``` CSS and handle CORS headers as needed, plus you'll have a smooth upgrade path to internationalize later.
-
-### alternatives?
-
-    XXX add a target to the 'well-documented' link
-    XXX how about a table of features showing self-hosted vs third-party service? or is a bulleted list better...
-
-The alternative to hosting your own font files is to use a third-party provider. The pros and cons are [well-documented](http://www.artzstudio.com/2012/02/web-font-performance-weighing-fontface-options-and-alternatives/), but things to consider might include:
-
-* whether you need fonts to work with JS disabled
-  * if not, your only third-party option is google font API, and the selection is relatively limited
-* what happens to your site if the third-party service is slow or goes down (hint: it's [not good](www.stevesouders.com/blog/2009/10/13/font-face-and-performance/))
-* whether the third-party has the fonts you need (maybe not Google) at a price you can afford (maybe not Typekit)
-
-Google and Typekit both provide locale-based subsetting transparently, and their slick, jointly-developed Webfont Loader fires events that make it easier to manage the FOUT.
-
 ## Wrapping up
 
-```connect-fonts``` is a great tool for self-hosting high performance web fonts. You can get it from [github](https://github.com/shane-tomlinson/connect-fonts) or [npm](npmjs.org/package/connect-fonts).
+If you self-host web fonts on a connect-based site, font subsetting can bring huge performance gains. If your site isn't yet internationalized, you can still use just your native subset. ```connect-fonts``` will still generate ```@font-face``` CSS and handle CORS headers for you, plus you'll have a smooth upgrade path to internationalize later.
 
 ### Future directions
 
-Today, ```connect-fonts``` handles subsetting based on locale. What if it also stripped out font hinting for platforms that don't need it (everything other than Windows)? What if it also optionally gzipped fonts and added far-future caching headers? There's cool work yet to be done. If you'd like to contribute ideas or code, we'd love the help! Grab the [source](https://github.com/shane-tomlinson/connect-fonts) from github and submit issues or pull requests.
-
+Today, ```connect-fonts``` handles subsetting based on locale. What if it also stripped out font hinting for platforms that don't need it (everything other than Windows)? What if it also optionally gzipped fonts and added far-future caching headers? There's cool work yet to be done. If you'd like to contribute ideas or code, we'd love the help! Grab the [source](https://github.com/shane-tomlinson/connect-fonts) and dive in.
