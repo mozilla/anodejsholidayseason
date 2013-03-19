@@ -1,21 +1,20 @@
 
-# Localization community, tools, and ...
+# Localization community, tools, and process
 
-In our previous post localizing Node.js services, we learned how to add i18n-abide to our service.
+In our previous post "How to Localize Your Node.js service", we learned how to add i18n-abide to our code.
 
 We wrapped strings in templates files as well as JavaScript files with calls to a function `gettext`. As developers, our work ends there. But the work of getting our copy localized has just begun.
 
-We've built out a Node.js toolchain for localizing all these strings.
-[Who cares? Weird place for this sentance?]
-
 ## The toolchain
 
-A goal for Mozilla Persona's Node code is to be compatible with the larger Mozilla community, while being Node friendly and flexible.
+A goal for Mozilla Persona's Node.js code is to be compatible with the larger Mozilla community, while being Node friendly and flexible.
 
-Mozilla is over a decade old. It's had one of the bigest (and coolest) l10n communities in Open Source. As a result, it has many tools and the lowest levels are old crotchety tools.
+The Mozilla project is over a decade old.
+It's had one of the bigest (and coolest) l10n communities in Open Source.
+As a result, it has many     existing tools and the lowest levels are old crotchety tools.
 
 ### Gettext
-GNU Gettext is a toolchain that allows you to localize Copy and other Strings from webapps or native apps. These are called Strings (after the C name for ... strings). When you write your Node.js code and templates, you put English Strings<sup>[1]</sup> in like normal, but you wrap them in a functional call to gettext.
+GNU Gettext is a toolchain that allows you to localize copy and other Strings from webapps or native apps. These are called Strings (after the C name for ... strings). When you write your Node.js code and templates, you put English Strings<sup>[1]</sup> in like normal, but you wrap them in a functional call to gettext.
 
 Wrapping with `gettext` does a few different things for you:
 * As a build step, you can extract all the Strings
@@ -35,70 +34,61 @@ An example snippet of a PO file named zh_TW/LC_MESSAGES/messages.po:
     msgid "Persona preserves your privacy"
     msgstr "Persona 保護您的隱私"
 
-We'll examine this in more detail below, but we can see that `msgid` is the English string and `msgstr` has the Chinese translation. There are comments in the file for where in the codebase the string is used.
+We'll examine this in more detail below, but we can see that `msgid` is the English String and `msgstr` has the Chinese translation. There are comments in the file for where in the codebase the String is used.
 
-There are many other tools that Gettext provides, for managing strings, PO files, etc. We'll cover these in a bit.
+There are many other tools that Gettext provides, for managing Strings, PO files, etc. We'll cover these in a bit.
 
-### SVN
-[Can we get away with not mentioning SVN?]
-Mozilla manages it's PO files for various projects with SVN. Mozilla is no stranger to git and other modern version control systems, but SVN is required within the L10n Community.
-
-**Of course you don't have to use SVN** with your Node.js service. It's mentioned here as we'll see it pop up later.
-
-So our basic constraint is to create a solution that uses `PO` files, which is what our localizers will deliver via SVN.
 
 ## Why a new toolchain?
-[Delete? or put in Going Deep?]
 Before we get into the Node modules that make working with Gettext easy, we must ask ourselves... why this toolchain?
 
-A year ago I did a deep survey of all the Node l10n and i18n modules. Most "reinvent the wheel", creating their own JSON based formats for storing strings.
+A year ago I did a deep survey of all the Node l10n and i18n modules. Most "reinvent the wheel", creating their own JSON based formats for storing Strings.
 
 In order to work with our community, we must use PO files. They have many tools such as [POEdit](http://www.poedit.net/), [Verbatim](https://localize.mozilla.org/), [Translate Toolkit](https://github.com/translate/translate), and [Pootle](https://github.com/translate/pootle)
 
+So our basic constraint is to create a solution that uses `PO` files, which is how we'll tell our localizers what all of our strings are and how they will give us the finished translations.
+
 Coming from PHP and Python at Mozilla, I've found that Gettext works very well. As a web service gets large and has more copy, there are many nuances of localizing copy that require the well tested API of gettext.
-
-[Chop this example?]
-
-Example:
-
-    <div id="system-updates">You have three updates.</div>
-    <div id="social-inbox">You have three udpates.</div>
-
-Assuming you used the word updates in two different contexts, some regions might wish to use two different terms for updates. So you need a contextual tag, so that they appear as two different strings.
-
-Also, those sentencaes are plural. In some languages there will be different copy depending on the number of things your refering too.
-
-Proper localization is hard! You better have an API that supports proper translations.
-
-That said, you can always go with a newer, more modern setup and add the missing features paper cut by paper cut. Just, please, look at Gettext and other older systems for API inspiration. They have millions of people hours of usage behind them.
 
 ## Providing PO Files to localizers
 
-So our code is marked up with `gettext` calls. Now what? Get thee a String wrangler. This person or persons can be you, a localization expert, or a build system guru.
+So our code is marked up with `gettext` calls. Now what?
+Get thee a **String wrangler**.
+This person or persons can be you, a localization expert, or a build system guru.
 
+So what does a String wrangler do?
 
-The following tasks are done in this phase
-
-* First time extraction of strings from the software
-* Extracting new, changed, or detecting deleted strings in later releases
+* First time extraction of Strings from the software
+* Extracting new, changed, or detecting deleted Strings in later releases
 * Preparing the PO files for each localizer team
-* Resolving conflicts and marking strings which have changed or been deleted
+* Resolving conflicts and marking Strings which have changed or been deleted
 
-This may sound complicated, but the good news is that only the String wrangler has to worry about this problems that crop up. These steps are automated.
+This may sound complicated, but the good news is that only the String wrangler has to worry about this problems that crop up.
+These steps can be automated.
 
-Developers won't need these tools on their machines and the runtime Node.js system can be blissfully ignorant of them, but `msginit`, `xgettext`, `msgfmt` and other GNU Gettext tools are a powerful way to manage catalogs of strings.
+Developers won't need these tools on their machines and the runtime Node.js system can be blissfully ignorant of them, but `msginit`, `xgettext`, `msgfmt` and other [GNU Gettext tools](TODO) are a powerful way to manage catalogs of Strings.
 
-[Explain the steps]
+### Setup locale filesystem
 
-[Explain how msgmerge is superior to homegrown .json systems]
+    $ mkdir -p locale/templates/LC_MESSAGES
 
-### jsxgettext
+This directory is where we'll store the PO template or POT files.
+The POT files are used by the Gettext toolchain.
 
-So how do we create these PO files? You can use traditional GNU Gettext utilities, but we've also written a Node module `jsxgettext`, which is a nice cross platform way to go.
+### Extract the Strings
 
-jsxgettext parses your source files looking for uses of Gettext functions, and then it extracts just the string part. It then formats a PO file, which is compatible with any other Gettext tool.
+    $ ./node_modules/.bin/extract-pot --locale locale .
 
-Here is an exceprt from a PO File.
+This script will recursively look through your source code and extract Strings.
+
+So how does `extract-pot` create these PO files?
+You can use traditional GNU Gettext utilities, but we've also written a Node module `jsxgettext`, which is a nice cross platform way to go.
+`extract-pot` uses `jsxgettext` behind the scenes.
+
+jsxgettext parses your source files looking for uses of Gettext functions, and then it extracts just the String part.
+It then formats a PO file, which is compatible with any other Gettext tool.
+
+Here is an excerpt from a PO File.
 
     #: resources/views/about.ejs:46
     msgid "Persona preserves your privacy"
@@ -137,13 +127,22 @@ After your localizers edit it, it will look more like this:
 
 You can [view the complete zh_TW PO file](http://svn.mozilla.org/projects/l10n-misc/trunk/browserid/locale/zh_TW/LC_MESSAGES/messages.po), to get a better idea.
 
-If they use the Gettext tool chains, you'll probably start with a PO file tempalte (a .POT file) and then generate the various locale PO files from that.
+### Creating a locale
 
-I won't go into all the details, but it is always a good idea to talk to the localizers before you start or read a Gettext tutorial.
+The Gettext tool `msginit` is used to create an empty PO file for a target locale, based on our POT file.
 
-## Wrapping up
+    $ for l in en_US de es; do
+        mkdir -p locale/${l}/LC_MESSAGES/
+        msginit --input=./locale/templates/LC_MESSAGES/messages.pot \
+                --output-file=./locale/${l}/LC_MESSAGES/messages.po \
+                -l ${l}
+      done
 
-So we've extracted our strings and created a bunch of locales.
+We can see that we've created English, German, and Spanish PO files.
+
+## PO files
+
+So we've extracted our Strings and created a bunch of locales.
 
 Here is a sample file system layout:
 
@@ -161,8 +160,45 @@ Here is a sample file system layout:
         LC_MESSAGES/
           messages.pot
 
-You can give your localizers access to this part of your codebase. The Spanish team will need access to `locale/es/LC_MESSAGES/messages.po` for example. If you have a really big team, you might have `es-ES` for Spain's Spanish and `es-AR` for Argentian Spanish, instead of just a base `es` for all Spanish locales.
+You can give your localizers access to this part of your codebase.
+The Spanish team will need access to `locale/es/LC_MESSAGES/messages.po` for example.
+If you have a really big team, you might have `es-ES` for Spain's Spanish and `es-AR` for Argentian Spanish, instead of just a base `es` for all Spanish locales.
 
 You can grow the number of locales over time.
+
+### Merging String changes
+
+Over time, you'll add new Strings and change or delete others. You'll need to update all of the PO files with these changes.
+
+Gettext has powerful tools to make this easy.
+
+We provide a wrapper shell script called `merge_po.sh` which uses `msgmerge` under the covers.
+
+Let's put the i18n-abide tools in our path:
+
+    $ export PATH=$PATH:node_modules/i18n-abide/bin
+
+And run a String merge:
+
+    $ ./node_modules/.bin/extract-pot --locale locale .
+    $ merge_po.sh ./locale
+
+Just like the first time... `extract-pot` grabs all the Strings and updates the POT file. Next `merge_po.sh` updates each locale's PO file to match our codebase. You can now ask your L10n teams to localize any new or changed Strings.
+
+### Gettext versus Not Invented Here
+It is easy enough to throw out Gettext and re-invent the wheel using an invented JSON format.
+This is the strategy that most node modules take.
+If you have a healthy application, as you add locales and develop new features, you will find yourself frustrated by a thousand paper cuts.
+Without `merge_po.sh`, you'll have to write your own merge tools.
+This is because if you have 30 locales, you'll need to update 30 JSON files without losing the work they've already done.
+
+Gettext offers a powerful merge feature, which will save us many painful hours of coordination.
+
+# Wrapping Up
+
+Now that we have various catalogs of strings in a po file per locale, we can hand these off to our localization teams.
+
+It is always a good idea to talk to the localizers before you start the extract / merge steps.
+You can read Gettext tutorials, as they are all comptaible with our setup.
 
 Okay, go get your Strings translated and in the next installment, we'll put them to work!

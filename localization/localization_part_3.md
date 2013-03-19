@@ -4,7 +4,9 @@
 
 So first we developed, then our L10n team did some string wrangling, now we've got several locales with translated strings...
 
-Now that our strings are in PO files, typically in a file system like this:
+Let's get these strings ready for Node.js and see this puppy in action!
+
+Typically in a file system like this:
 
     locale
       en
@@ -17,19 +19,22 @@ Now that our strings are in PO files, typically in a file system like this:
         LC_MESSAGES
           messages.po
 
-We need a way to get strings into our app at runtime. There are a few ways you can do this.
+We need a way to get strings in our PO files into our app at runtime. There are a few ways you can do this.
 
-The first way, is to have server side strings and use the `gettext` function provided by `i18n-abide` as we saw in the first blog post.
+The first way, is to have **server side strings** and the `gettext` function provided by i18n-abide will work it's magik.
 
-The second way, is to have a build step which creates JSON language files out of our PO files. We've switched to this method for all our strings, because we had to support this for client side translation, which make up the majority of our string usage.
+The second way, is to hav e**client side strings** and you'll include a gettext.js script in your code.
+This is distributed with i18n-abide.
 
-**Both of these methods require** the strings to be in a **JSON** file format. The server side translation loads them on app startup, and the client side translation loads them via HTTP (or you can put them into your built and minified JavaScript).
+**Both of these methods require** the strings to be in a **JSON** file format.
+The server side translation loads them on app startup, and the client side translation loads them via HTTP (or you can put them into your built and minified JavaScript).
 
-Since this system is compatible with GNU Gettext, a third option for server side strings is to use [node-gettext](https://github.com/andris9/node-gettext). It's quite efficient for doing server side translation.
+
+Since this system is compatible with GNU Gettext, a third option for server side strings is to use [node-gettext](https://github.com/andris9/node-gettext). It's quite efficient for doing server side translation. We'll use the first option in this post.
+
+### po2json.js
 
 So, how do we get our strings from PO into JSON files?
-
-### po2json
 
 Our build script is called `po2json.js`.
 
@@ -49,45 +54,64 @@ And we get a file structure like:
         pt_BR
           messages.json
 
-Wow, we've covered a lot of ground. Let's look at some deeper details...
+**Note:** You **don't need** the .PO files **to be deployed to production**, but it doesn't hurt to ship them.
 
------------
+The `static` directory is exposed to web traffic, so a request to `/i18n/es/messages.json` would get the Spanish JSON file.
 
-
-
+You can do this via Node.js or a webserver such as `nginx`.
 
 ## Config
 
-`i18n-abide` requires some configuration to decide which languages are supported.
+`i18n-abide` requires some configuration to decide which languages are supported and to know where to find our JSON files.
 
-i18n-abide will do it's best to serve up an appropriate localized string. If it cannot, it will serve up the string you've put into your code and templates.
-
-As we saw in the first isntallment, here is the required configuration for our app
+As we saw in the first installment, here is the required configuration for our app
 
     app.use(i18n.abide({
       supported_languages: ['en-US', 'de', 'es', 'zh-TW'],
       translation_directory: 'static/i18n'
     }));
 
-This is an app that supports English, German, Spanish, Chinese (Traditional). The translated JSON files are under static/i18n.
+`supported_languages` tells the app that it supports English, German, Spanish, Chinese (Traditional).
+The `translation_directory` config says that the translated JSON files are under static/i18n.
+Note that `translation_directory` is needed for server side gettext only.
 
-You don't need the .PO files to be deployed to production, but it doesn't hurt to ship them.
+We mentioned in the first post that i18n-abide will do it's best to serve up an appropriate localized string.
+
+But, how do we know what the user's preferred language is?
+
+The i18n-abide module looks at the `Accept-Language` HTTP header.
+This sent by the browser and includes all of the user's preferred languages with a preference order.
+
+i18n-abide processes this value and compares it with your app's `supported_languages`.
+It will make the best match possible and serve up that language.
+
+If it cannot find a good match, it will serve up the strings you've put into your code and templates, which is typically English strings.
+
 
 ## Start you engines
+
+Okay, now that configs are in place, we have atleast one locale transliated, let's fire it up!
 
     npm start
 
 In your web browser, change your preferred language.
 
-Screenshot 1
-Screenshot 2
+![](lang_selection.png)
 
+Now load a page for your application. You should see it localized now.
+
+![](dialog-greek.png)
+
+Here is Mozilla Persona in **Greek**. So, cool!
+
+Screenshot zh-TW.
 
 ### gobbledygook
 
-If you want to **test** your L10n setup, **before you have real translations** done, we're built a great testing locale. It is inspired by David Bowie's Labrythn.
+If you want to **test** your L10n setup, **before you have real translations** done, we're built a great test locale.
+It is inspired by David Bowie's Labrythn.
 
-To use it, just add `it-CH` or another locale you're not currently using to your config as the **debug** locale.
+To use it, just add `it-CH` or another locale you're not currently using to your config under both `supported_languages` as well as the **debug_lang** setting.
 
 Partial config showing `it-CH` is used in supported_languages and debug_lang.
 
@@ -96,82 +120,97 @@ Partial config showing `it-CH` is used in supported_languages and debug_lang.
       debug_lang: 'it-CH',
       ...
 
-Now if you set your browser's preferred language to Italian/Switcherland, i18n-abide will use gobbledygook to localize the content.
+Now if you set your browser's preferred language to Italian/Switzerland, i18n-abide will use gobbledygook to localize the content.
 
 ![](it-CH-chooser.png)
 
-This is a handy way to ensure your design and copy work for bi-directional languages like Hebrew, before you have the resources to support that community.
+This is a handy way to ensure your design and copy work for bi-directional languages like Hebrew.
+Your web designer can test their RTL CSS, before you have the resources to create actual Hebrew strings.
+
+![](db-LB.png)
 
 ## Going Deeper
-We've just scratched the surface of i18n and l10n. If you ship a Node.js in multiple locales, you'll find many gotchas and interesting nuances.
+We've just scratched the surface of i18n and l10n.
+If you ship a Node.js in multiple locales, you'll find many gotchas and interesting nuances.
 
-Here is a heads up on a few:
+Here is a heads up on a few more topics.
+
+### String interpolation
+
+i18n-abide provides a `format` function which can be used in client or server side JavaScript code.
+
+Format takes a formatted string. This function can be used in one of two flavors of parameter replacements.
+
+Formats
+* %s - `format` is called with a format string and then an array of strings. Each will be replaced in order.
+* %(named)s - `format` is called with a format string and then an object where the keys match the named parameters.
+
+You can use `format` to keep HTML in your strings to a minimum.
+
+Consider these three examples
+
+    {{gettext('<p>Buy <a href="/buy?prod=blue&tyep=ticket">Blue Tickets</a> Now!</p>')}}
+    <p>{{format(gettext('Buy <a href="%s">Blue Tickets</a> Now!', ['/buy?prod=blue&tyep=ticket']))</p>}}
+    <p>{{format(gettext('Buy <a href="%(url)s">Blue Tickets</a> Now!', {url: '/buy?prod=blue&tyep=ticket'}))</p>}}
+
+In the PO file, they produce these strings:
+
+    msgid "<p>Buy <a href=\"/buy?prod=blue&tyep=ticket\">Blue Tickets</a> Now!</p>"
+    msgid "Buy <a href="%s">Blue Tickets</a> Now!"
+    msgid "Buy <a href="%(url)s">Blue Tickets</a> Now!"
+
+The first example has a paragraph tag that shows up in the PO file. Yuck.
+If you ever change the markup... you may have to update it in every locale!
+
+Also, look at that ugly URL.
+
+Reasons to use format:
+* Avoid confusing localizers who aren't familar with HTML and may break your code accidentally
+* Avoid maintenance issues
+
+The named parameters are nice, in that they are self documenting.
+The localizer knows that the variable is a URL.
+
+String interpolation is quite common in localizaing software.
+
+Another example is runtime data injected into your strings.
+
+    <p>{{format(gettext('Welcome back, %(user_name)s'), {user_name: user.name})}}</p>
+
+## Avoid Inflexible Design
+
+We need to put our L10n hats on as early as when we review the initial graphic design of the website.
+
+Avoid putting copy into images. Use CSS to keep words as plain text positioned over images.
+
+Make sure [CSS is bulletproof](). An English word in German can be many times larger and destroy a
+poorly planned design.
+
+Database backed websites have already taught us to think this way, but designers may not be used to
+allowing for variable length labels or buttons.
 
 
+## String Freeze
 
-## Format, gettext, ngettext
+Remember our build step to prepare files for localizers to transalte?
+And in this post we learned about `po2json` for using these strings in our app...
+Well, this means we're going to need to coordinate our software releases with our L10n community.
 
-We haven't mentioned `format` yet. This is another JS function which `i18n-abide` injects. String interpolation is quite common in localizaing software.
+Continuous deployment isn't a solved problem with L10n. Either you have to block on getting 100%
+of your strings translated before deploying, or be comfortable with a partially translated app in some locales.
 
-Here are some examples:
+L10n teams may need 2 or 3 weeks to localize your app, depending on how many strings there are.
+Schedule this to happen during the QA cycle.
 
-    format(gettext('<a href="$s">Register with our partner $s</a>), 'https://example.com', 'Example');
+Provide a live preview site, so that localizers can check their work.
 
-We have regional partners and the name and url vary by locale.
+You should build a string freeze into your project schedule.
 
-    <p>(format(gettext('Welcome back, $s'), user.name);</p>
+## Wrapping up
 
-We need to inject app or user data into strings.
+In these three blog posts, we've seen how to develop a localized app with `i18n-abide`.
+How to add a L10n phase to our release build.
+And lastly, how to test our work.
 
-    format(ngettext('You have $s followers', $s), $s);
-
-Copy has plurals. `ngettext` captures this in the PO files as well as returning the correct translation based on the number of items.
-
-## User's Preffered Language
-
-What... so how do we know what the user's preferred language is?
-
-The i18n-abide module looks at the `Accept-Language`
-...
-
-### Extracting Strings
-
-We mentioned that you can use GNU Gettext's `xgettext` to extract your strings. This is how Persona did it originally.
-
-Another wrinkle is that GNU Gettext doesn't know how to parse JavaScript or various flavors of Node templating languages.
-
-If you do want to use xgettext, you'll want to parse JavaScript files as Perl and EJS files as PHP. See, I told you it was gnarly! Use jsxgettext instead.
-
-That is why we wrote `jsxgettext`.
-
-# Going Deep
-
-## Bells and Whistles
-
-How does one test that their site is ready for localizers? We've created a node module called `gobbledygook` which ...
-
-[1] You could use variable names or something else, instead of the actual copy. Then you'd "localize" the English version, just like any other locale. This is not how it is done for Mozilla web services.
-
-## Beyond Node.js
-
-Many important aspects of Internationalization and Localization are things you should be aware of regardless of the programming language or framework.
-
-It is important to work L10n into most phases of software development. When your designers have mockups, have a L10n guru review them.
-
-A design should support Right to Left layout, instead of only a Left to Right composition. If you have a large call to action block on the left side of a page and other secondary blocks of content to support it... Then in Hebrew and other RTL languages, you'll want the layout mirrored, so that the call to action has the same impact. Some clever CSS can take advantage of the `dir` HTML attribute.
-
-Images with text in them are expensive and problematic. An image or any container needs to be bulletproof. Idiomatic English might look great in that trendy faux sticker, but then adding the same content in German may not be possible as 4 letters have become 14.
-
-Just like designers learned with data driven websites, where layouts and elements are filled with different content from the database... Designers often have to re-learn that even static elements like Banners and promotional links will vary in size.
-
-Getting to clever with a design can add expense, especially if an asset is manually created for each locale. This doesn't scale and can slow down your deployment.
-
-In addition to a code review, have developers or L10n team members review code regularly for proper use of Gettext. In addition to words, numbers and dates require special care. Everyone in the world doesn't format 5,000 like 5,000. Nor do they do that on Jan 5th, 2013.
-
-Reviews will catch these early, getting them into your string catalogs like PO files in the correct format. Correcting this in the middle of localization can be a nightmare, as you have to try to update N number of PO files with N L10n teams with members who often aren't comfortable with version control.
-
-Many teams have a code freeze to control quality and schedules. Similarly you need you developers and copy writers to coordinate with your L10n team. You should have a string freeze and plan on giving L10n enough time to do their work. Luckily, this can often overlap wtih your QA and Security testing.
-
-Just like a code freeze, only exceptional situations should change copy in the app before pushing to production.
-
-Continuous deployment for localized applications is not a solved problem. It is much easier to do scheduled deployments with L10n time backed in. You may have to wait until the slowest L10n team is done before deploying to production.
+Localizing your website or application will make your site valuable to an even larger global audience.
+Node.js hackers, go build some fun!
