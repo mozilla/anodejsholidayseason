@@ -19,15 +19,15 @@ Typically in a file system like this:
         LC_MESSAGES
           messages.po
 
-We need a way to get strings in our PO files into our app at runtime. There are a few ways you can do this.
+We need a way to get strings in our PO files into our application at runtime. There are a few ways you can do this.
 
-The first way, is to have **server side strings** and the `gettext` function provided by i18n-abide will work it's magik.
+The first way, is to have **server side strings** and the `gettext` function provided by i18n-abide will work it's magic.
 
-The second way, is to hav e**client side strings** and you'll include a gettext.js script in your code.
+The second way, is to have **client side strings** and you'll include a gettext.js script in your code.
 This is distributed with i18n-abide.
 
 **Both of these methods require** the strings to be in a **JSON** file format.
-The server side translation loads them on app startup, and the client side translation loads them via HTTP (or you can put them into your built and minified JavaScript).
+The server side translation loads them on application startup, and the client side translation loads them via HTTP (or you can put them into your built and minified JavaScript).
 
 
 Since this system is compatible with GNU Gettext, a third option for server side strings is to use [node-gettext](https://github.com/andris9/node-gettext). It's quite efficient for doing server side translation. We'll use the first option in this post.
@@ -58,13 +58,13 @@ And we get a file structure like:
 
 The `static` directory is exposed to web traffic, so a request to `/i18n/es/messages.json` would get the Spanish JSON file.
 
-You can do this via Node.js or a webserver such as `nginx`.
+You can do this via Node.js or a web server such as `nginx`.
 
-## Config
+## Configuration
 
 `i18n-abide` requires some configuration to decide which languages are supported and to know where to find our JSON files.
 
-As we saw in the first installment, here is the required configuration for our app
+As we saw in the first installment, here is the required configuration for our application
 
     app.use(i18n.abide({
       supported_languages: ['en-US', 'de', 'es', 'zh-TW'],
@@ -80,7 +80,7 @@ We mentioned in the first post that i18n-abide will do it's best to serve up an 
 But, how do we know what the user's preferred language is?
 
 The i18n-abide module looks at the `Accept-Language` HTTP header.
-This sent by the browser and includes all of the user's preferred languages with a preference order.
+This is sent by the browser and includes all of the user's preferred languages with a preference order.
 
 i18n-abide processes this value and compares it with your app's `supported_languages`.
 It will make the best match possible and serve up that language.
@@ -90,37 +90,37 @@ If it cannot find a good match, it will serve up the strings you've put into you
 
 ## Start you engines
 
-Okay, now that configs are in place, we have atleast one locale transliated, let's fire it up!
+Okay, now that configs are in place and we have at least one locale translated, let's fire it up!
 
     npm start
 
-In your web browser, change your preferred language.
+In your web browser, change your preferred language to one which you have localized.
 
 ![](lang_selection.png)
 
-Now load a page for your application. You should see it localized now.
+Now load a page for your application. You should see it translated now.
 
-![](dialog-greek.png)
+
 
 Here is Mozilla Persona in **Greek**. So, cool!
 
-Screenshot zh-TW.
+![](dialog-greek.png)
 
 ### gobbledygook
 
 If you want to **test** your L10n setup, **before you have real translations** done, we're built a great test locale.
-It is inspired by David Bowie's Labrythn.
+It is inspired by David Bowie's Labyrinth.
 
 To use it, just add `it-CH` or another locale you're not currently using to your config under both `supported_languages` as well as the **debug_lang** setting.
 
-Partial config showing `it-CH` is used in supported_languages and debug_lang.
+Example partial config:
 
     app.use(i18n.abide({
       supported_languages: ['en-US', 'de', 'es', 'zh-TW', 'it-CH'],
       debug_lang: 'it-CH',
       ...
 
-Now if you set your browser's preferred language to Italian/Switzerland, i18n-abide will use gobbledygook to localize the content.
+Now if you set your browser's preferred language to Italian/Switzerland (it-CH), i18n-abide will use gobbledygook to localize the content.
 
 ![](it-CH-chooser.png)
 
@@ -139,7 +139,8 @@ Here is a heads up on a few more topics.
 
 i18n-abide provides a `format` function which can be used in client or server side JavaScript code.
 
-Format takes a formatted string. This function can be used in one of two flavors of parameter replacements.
+Format takes a formatted string and replaces parameters with actual values at runtime.
+This function can be used in one of two flavors of parameter replacements.
 
 Formats
 * %s - `format` is called with a format string and then an array of strings. Each will be replaced in order.
@@ -171,7 +172,7 @@ Reasons to use format:
 The named parameters are nice, in that they are self documenting.
 The localizer knows that the variable is a URL.
 
-String interpolation is quite common in localizaing software.
+String interpolation is quite common in localizing software.
 
 Another example is runtime data injected into your strings.
 
@@ -179,20 +180,23 @@ Another example is runtime data injected into your strings.
 
 ## Avoid Inflexible Design
 
-We need to put our L10n hats on as early as when we review the initial graphic design of the website.
+We need to put our L10n hats on early.
+As early as when we review the initial graphic design of the website.
 
 Avoid putting copy into images. Use CSS to keep words as plain text positioned over images.
 
 Make sure [CSS is bulletproof](). An English word in German can be many times larger and destroy a
 poorly planned design.
 
-Database backed websites have already taught us to think this way, but designers may not be used to
+Database backed websites have already taught us to think about systematic design way, but designers may not be used to
 allowing for variable length labels or buttons.
+
+Overly "tight" or clever designs simply will not work in a localized context.
 
 
 ## String Freeze
 
-Remember our build step to prepare files for localizers to transalte?
+Remember our build step to prepare files for localizers to translate?
 And in this post we learned about `po2json` for using these strings in our app...
 Well, this means we're going to need to coordinate our software releases with our L10n community.
 

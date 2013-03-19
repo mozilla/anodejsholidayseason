@@ -7,7 +7,7 @@ Mozilla provides products and services which are localized into as many as 90 la
 The following are just a few examples of localization:
 * Providing copy translated into a specific regional variation of a language
 * Rendering a screen right to left for a given language
-* Bulletproofing designs to accomodate variable length copy
+* Bulletproofing designs to accommodate variable length copy
 * Making labels, headings, and buttons have names that resonate with a local audience
 
 In this series of posts, I'm going to cover some technical aspects of how to localize a Node.js service.
@@ -51,7 +51,7 @@ In your code
       translation_directory: 'static/i18n'
     }));
 
-We will look at the configuration values in detail during the third intallment of this L10n series.
+We will look at the configuration values in detail during the third installment of this L10n series.
 
 The i18n `abide` middleware sets up request processing and injects various functions we'll use for translation.
 
@@ -74,10 +74,12 @@ It will be either `ltr` or `rtl`. The English language is rendered `ltr` or left
 
 `gettext` is a JS function which will take an English string and return a localize string, again based on the user's preferred region and language.
 
-
 When doing localization, we refer to **strings** or Gettext strings.
-These are peices of copy, labels, button, etc.
-Any prose that is visible to the end user is a String.
+These are pieces of copy, labels, button, etc.
+Any prose that is visible to the end user is a string.
+
+Technically, we don't mean JavaScript String, as you can have strings which are part of your program, but never shown to the user.
+String is overloaded to mean, stuff that must get translated.
 
 Here is an example JavaScript file:
 
@@ -87,15 +89,15 @@ Here is an example JavaScript file:
         });
     });
 
-We can see that these variables and functions are placed in the `req` object.
+We can see that these variables and functions (like `gettext`) are placed in the `req` object.
 
-So to setup our site for localization, we must look through all of our code and templates and wrap strings in calls to gettext.
+So to setup our site for localization, we must look through all of our code and templates and wrap **strings** in calls to `gettext`.
 
 ## Language Detection
 
-By setting up the i18n-abide module, we've actually installed a new peice of middleware.
+By setting up the i18n-abide module, we've actually installed a new piece of middleware.
 
-At runtime, the middleware will detect the user's prefered locale.
+At runtime, the middleware will detect the user's preferred locale.
 It will look at it's configuration to find the best language match.
 It will then output "Hello, World!" localized to one of your supported languages or default to English.
 
