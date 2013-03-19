@@ -1,6 +1,6 @@
 # How to Localize Your Node.js service
 
-![](dialog_fan2.png)
+![](dialog_fanv2.png)
 
 Mozilla provides products and services which are localized into as many as 90 languages!
 
