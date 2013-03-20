@@ -117,7 +117,7 @@ Now if you set your browser's preferred language to Italian/Switzerland (it-CH),
 
 ![](it-CH-chooser.png)
 
-This is a handy way to ensure your design and copy work for bi-directional languages like Hebrew.
+This is a handy way to ensure your visual design and prose work for bi-directional languages like Hebrew.
 Your web designer can test their RTL CSS, before you have the resources to create actual Hebrew strings.
 
 ![](db-LB.png)
@@ -143,9 +143,9 @@ You can use `format` to keep HTML in your strings to a minimum.
 
 Consider these three examples
 
-    {{gettext('<p>Buy <a href="/buy?prod=blue&tyep=ticket">Blue Tickets</a> Now!</p>')}}
-    <p>{{format(gettext('Buy <a href="%s">Blue Tickets</a> Now!', ['/buy?prod=blue&tyep=ticket']))</p>}}
-    <p>{{format(gettext('Buy <a href="%(url)s">Blue Tickets</a> Now!', {url: '/buy?prod=blue&tyep=ticket'}))</p>}}
+    <%= gettext('<p>Buy <a href="/buy?prod=blue&tyep=ticket">Blue Tickets</a> Now!</p>') %>
+    <p><%= format(gettext('Buy <a href="%s">Blue Tickets</a> Now!', ['/buy?prod=blue&tyep=ticket'])) %></p>
+    <p><%= format(gettext('Buy <a href="%(url)s">Blue Tickets</a> Now!', {url: '/buy?prod=blue&tyep=ticket'})) %></p>
 
 In the PO file, they produce these strings:
 
@@ -169,14 +169,14 @@ String interpolation is quite common in localizing software.
 
 Another example is runtime data injected into your strings.
 
-    <p>{{format(gettext('Welcome back, %(user_name)s'), {user_name: user.name})}}</p>
+    <p><%= format(gettext('Welcome back, %(user_name)s'), {user_name: user.name}) %></p>
 
 ## Avoid Inflexible Design
 
 We need to put our L10n hats on early.
 As early as when we review the initial graphic design of the website.
 
-Avoid putting copy into images. Use CSS to keep words as plain text positioned over images.
+Avoid putting text into images. Use CSS to keep words as plain text positioned over images.
 
 Make sure [CSS is bulletproof](). An English word in German can be many times larger and destroy a
 poorly planned design.

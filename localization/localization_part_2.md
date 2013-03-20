@@ -3,7 +3,7 @@
 
 In our previous post "How to Localize Your Node.js service", we learned how to add i18n-abide to our code.
 
-We wrapped strings in templates files as well as JavaScript files with calls to a function `gettext`. As developers, our work ends there. But the work of getting our copy localized has just begun.
+We wrapped strings in templates files as well as JavaScript files with calls to a function `gettext`. As developers, our work ends there. But the work of getting our prose localized has just begun.
 
 ## The toolchain
 
@@ -14,7 +14,7 @@ It's had one of the biggest (and coolest) L10n communities in Open Source.
 As a result, it has many existing tools and those at the lowest levels are sometimes old *crotchety* tools.
 
 ### Gettext
-GNU Gettext is a toolchain that allows you to localize copy and other strings from webapps or native apps. These are called strings (after the C name for ... strings). When you write your Node.js code and templates, you put English strings<sup>[1]</sup> in like normal, but you wrap them in a functional call to `gettext`.
+GNU Gettext is a toolchain that allows you to localize text from webapps or native apps. These are called strings (after the C name for ... strings). When you write your Node.js code and templates, you put English strings in like normal, but you wrap them in a function call to `gettext`.
 
 Wrapping with `gettext` does a few different things for you:
 * As a build step, you can extract all the strings into a string catalog
@@ -51,7 +51,7 @@ They have many tools such as [POEdit](http://www.poedit.net/), [Verbatim](https:
 So our basic constraint is to create a solution that uses `PO` files, which is how we'll tell our localizers what all of our strings are and how they will give us the finished translations.
 
 Coming from PHP and Python at Mozilla, I've found that Gettext works very well.
-As a web service gets large and has more copy, there are many nuances of localizing copy that require the well tested tools and APIs of gettext.
+As a web application gets large and has more prose, there are many nuances of localizing text that require the well tested tools and APIs of gettext.
 
 ## Providing PO Files to localizers
 
