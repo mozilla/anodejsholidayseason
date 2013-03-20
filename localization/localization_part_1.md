@@ -59,17 +59,17 @@ The next step is to work through all of your code where you have user visible pr
 
 Here is an example template file:
 
-    <html lang="{{LANG}}" dir="{{DIR}}">
+    <html lang="<%= lang %>" dir="<%= lang_dir %>">
       <head>
-        <title>{{gettext('Mozilla Persona')}}</title>
+        <title><%= gettext('Mozilla Persona') %></title>
 
 The key thing abide does, is it injects into the Node and express framework references to the `gettext` function.
 
-Abide also provides other variables and functions, such as `LANG`, `DIR`.
+Abide also provides other variables and functions, such as `lang`, `lang_dir`.
 
-`LANG` is the language code based on the user's browser and preferred language settings.
+`lang` is the language code based on the user's browser and preferred language settings.
 
-`DIR` is for [bidirectional text](http://en.wikipedia.org/wiki/Bi-directional_text) support.
+`lang_dir` is for [bidirectional text](http://en.wikipedia.org/wiki/Bi-directional_text) support.
 It will be either `ltr` or `rtl`. The English language is rendered `ltr` or left to right.
 
 `gettext` is a JS function which will take an English string and return a localize string, again based on the user's preferred region and language.
