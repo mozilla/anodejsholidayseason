@@ -5,9 +5,9 @@
 Mozilla provides products and services which are localized into as many as 90 languages!
 
 The following are just a few examples of localization:
-* Providing copy translated into a specific regional variation of a language
+* Providing text translated into a specific regional variation of a language
 * Rendering a screen right to left for a given language
-* Bulletproofing designs to accommodate variable length copy
+* Bulletproofing designs to accommodate variable length prose
 * Making labels, headings, and buttons have names that resonate with a local audience
 
 In this series of posts, I'm going to cover some technical aspects of how to localize a Node.js service.
@@ -33,7 +33,7 @@ We created these modules, to meet the following goals
 i18n-abide is the main module you'll use to integrate translations into your own service.
 Let's walk through how to add it.
 
-In these examples, we'll assume your code uses Express and EJS templates.
+In these examples, we'll assume your code uses [Express](http://expressjs.com/) and [EJS templates](https://github.com/visionmedia/ejs).
 
 ## Installation
 
@@ -55,7 +55,7 @@ We will look at the configuration values in detail during the third installment 
 
 The i18n `abide` middleware sets up request processing and injects various functions we'll use for translation.
 
-The next step is to work through all of your code where you have user visible copy.
+The next step is to work through all of your code where you have user visible prose.
 
 Here is an example template file:
 
@@ -75,7 +75,7 @@ It will be either `ltr` or `rtl`. The English language is rendered `ltr` or left
 `gettext` is a JS function which will take an English string and return a localize string, again based on the user's preferred region and language.
 
 When doing localization, we refer to **strings** or Gettext strings.
-These are pieces of copy, labels, button, etc.
+These are pieces of prose, labels, button, etc.
 Any prose that is visible to the end user is a string.
 
 Technically, we don't mean JavaScript String, as you can have strings which are part of your program, but never shown to the user.
@@ -84,7 +84,7 @@ String is overloaded to mean, stuff that must get translated.
 Here is an example JavaScript file:
 
     app.get('/', function(req, res) {
-        res.render('homepage', {
+        res.render('homepage.ejs', {
             title: req.gettext('Hello, World!')
         });
     });
@@ -97,9 +97,17 @@ So to setup our site for localization, we must look through all of our code and 
 
 By setting up the i18n-abide module, we've actually installed a new piece of middleware.
 
-At runtime, the middleware will detect the user's preferred locale.
-It will look at it's configuration to find the best language match.
-It will then output "Hello, World!" localized to one of your supported languages or default to English.
+At runtime, the middleware will detect the user's preferred language.
+
+But, how do we know what the user's preferred language is?
+
+The i18n-abide module looks at the `Accept-Language` HTTP header.
+This is sent by the browser and includes all of the user's preferred languages with a preference order.
+
+i18n-abide processes this value and compares it with your app's `supported_languages` configuration.
+It will make the best match possible and serve up that language.
+
+If it cannot find a good match, it will serve up the strings you've put into your code and templates, which is typically English strings.
 
 ## Wrapping Up
 

@@ -75,18 +75,11 @@ As we saw in the first installment, here is the required configuration for our a
 The `translation_directory` config says that the translated JSON files are under static/i18n.
 Note that `translation_directory` is needed for server side gettext only.
 
-We mentioned in the first post that i18n-abide will do it's best to serve up an appropriate localized string.
+We explained in the first post that i18n-abide will do it's best to serve up an appropriate localized string.
 
-But, how do we know what the user's preferred language is?
+It will look at `supported_languages` in the configuration to find the best language match.
 
-The i18n-abide module looks at the `Accept-Language` HTTP header.
-This is sent by the browser and includes all of the user's preferred languages with a preference order.
-
-i18n-abide processes this value and compares it with your app's `supported_languages`.
-It will make the best match possible and serve up that language.
-
-If it cannot find a good match, it will serve up the strings you've put into your code and templates, which is typically English strings.
-
+You should only put languages in, where you have a locale JSON file ready to go.
 
 ## Start you engines
 
