@@ -34,11 +34,11 @@ Since this system is compatible with GNU Gettext, a third option for server side
 
 We'll use the first option in this blog post, as it is the most common way to use i18n-abide.
 
-### po2json.js
+### compile-json
 
 So, how do we get our strings out of the PO files and into JSON files?
 
-Our build script is called `po2json.js`.
+Our build script is called `compile-json`.
 
 Assuming out files are in a top level directory `locale` of our project, and we want the `.json` files to go into `static/i18n`, we'd do this:
 
@@ -58,7 +58,7 @@ And we get a file structure like:
         el
           messages.json
 
-`compile-json` loops over each of our `.po` files and calls `po2json.js` on it, producing a `.json` file.
+`compile-json` loops over each of our `.po` files and calls `po2json.js` on it, producing a `.json` file. `po2json.js` is another program provided by i18n-abide.
 
 If we take the messages.po we have so far from these blog posts, we'd see:
 
