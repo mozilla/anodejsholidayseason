@@ -63,7 +63,7 @@ And we get a file structure like:
 
 `compile-json` loops over each of our `.po` files and calls `po2json.js` on it, producing `.json` and `.js` files. `po2json.js` is another program provided by i18n-abide.
 
-If we take the messages.po we have so far from these blog posts, we'd see:
+If we take the Spanish messages.po we have so far from these blog posts, we'd see:
 
     # Spanish translations for PACKAGE package.
     # Copyright (C) 2013 THE PACKAGE'S COPYRIGHT HOLDER
