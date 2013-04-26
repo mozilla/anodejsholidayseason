@@ -2,7 +2,7 @@
 
 ## Using Our Strings
 
-So [first we added the i18n-abide module to our code](https://hacks.mozilla.org/2013/04/localize-your-node-js-service-part-1-of-3-a-node-js-holiday-season-part-9/), then our [L10n team did some string wrangling](https://hacks.mozilla.org/2013/04/localization-community-tools-process-part-2-of-3-a-node-js-holiday-season-part-10/), now we've got several locales with translated strings...
+So [first we added the i18n-abide module to our code](https://hacks.mozilla.org/2013/04/localize-your-node-js-service-part-1-of-3-a-node-js-holiday-season-part-9/), then our [Localization (L10n) team did some string wrangling](https://hacks.mozilla.org/2013/04/localization-community-tools-process-part-2-of-3-a-node-js-holiday-season-part-10/), now we've got several locales with translated strings...
 
 Let's get these strings ready for Node.js and see this puppy in action!
 
@@ -53,14 +53,17 @@ And we get a file structure like:
       i18n
         en
           messages.json
+          messages.js
         de
           messages.json
+          messages.js
         el
           messages.json
+          messages.js
 
-`compile-json` loops over each of our `.po` files and calls `po2json.js` on it, producing a `.json` file. `po2json.js` is another program provided by i18n-abide.
+`compile-json` loops over each of our `.po` files and calls `po2json.js` on it, producing `.json` and `.js` files. `po2json.js` is another program provided by i18n-abide.
 
-If we take the messages.po we have so far from these blog posts, we'd see:
+If we take the Spanish messages.po we have so far from these blog posts, we'd see:
 
     # Spanish translations for PACKAGE package.
     # Copyright (C) 2013 THE PACKAGE'S COPYRIGHT HOLDER
@@ -94,12 +97,10 @@ which would be converted into
           },
           "Mozilla Persona": [
              null,
-             ""
+             "Mozilla Personidada"
           ]
        }
     }
-
-[EDITOR NOTE - There is a bug in i18n-abide here, which I will fix.]
 
 So we can use these .json files server side form Node code, or client side by requesting them via AJAX.
 
@@ -125,13 +126,13 @@ As we saw [in the first installment](https://hacks.mozilla.org/2013/04/localize-
 The `translation_directory` config says that the translated JSON files are under static/i18n.
 Note that `translation_directory` is needed for **server side** gettext only.
 
-We explained in the first post that i18n-abide will do it's best to serve up an appropriate localized string.
+We explained in the first post that i18n-abide will do its best to serve up an appropriate localized string.
 
 It will look at `supported_languages` in the configuration to find the best language match.
 
 You should only put languages in `supported_languages`, where you have a locale JSON file ready to go.
 
-## Start you engines
+## Start your engines
 
 Okay, now that configs are in place and we have at least one locale translated, let's fire it up!
 
@@ -192,8 +193,8 @@ You can use `format` to keep HTML in your strings to a minimum.
 Consider these three examples
 
     <%= gettext('<p>Buy <a href="/buy?prod=blue&tyep=ticket">Blue Tickets</a> Now!</p>') %>
-    <p><%= format(gettext('Buy <a href="%s">Blue Tickets</a> Now!', ['/buy?prod=blue&tyep=ticket'])) %></p>
-    <p><%= format(gettext('Buy <a href="%(url)s">Blue Tickets</a> Now!', {url: '/buy?prod=blue&tyep=ticket'})) %></p>
+    <p><%= format(gettext('Buy <a href="%s">Blue Tickets</a> Now!'), ['/buy?prod=blue&tyep=ticket']) %></p>
+    <p><%= format(gettext('Buy <a href="%(url)s">Blue Tickets</a> Now!'), {url: '/buy?prod=blue&tyep=ticket'}) %></p>
 
 In the PO file, they produce these strings:
 
@@ -224,22 +225,19 @@ Another example is runtime data injected into your strings.
 We need to put our L10n hats on early.
 As early as when we review the initial graphic design of the website.
 
-Avoid putting text into images. Use CSS to keep words as plain text positioned over images.
+* Avoid putting text into images. Use CSS to keep words as plain text positioned over images.
 
-Make sure [CSS is bulletproof](http://simplebits.com/publications/bulletproof/). An English word in German can be many times larger and destroy a
+* Make sure [CSS is bulletproof](http://simplebits.com/publications/bulletproof/). An English word in German can be many times larger and destroy a
 poorly planned design.
 
-Try this bookmarklet: <a href="javascript:(function(){var%20prefixes=['','glocken','das','borfa','maushe','uber'],suffixes=['','hausen','%20die%20vander','gleuten','noshan','flagellan','mek','dak','en%20das','ga'],xPathResult=document.evaluate('.//text()[normalize-space(.)!=\'\']',document.body,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null),i,textNode,cnt,out,j,pfx,sfx;for(i=0,l=xPathResult.snapshotLength;i<l;i++){textNode=xPathResult.snapshotItem(i);if(textNode.parentNode.nodeName.toLowerCase()=='script'||textNode.tagName=='style')continue;cnt=textNode.data.split(/\s/g);out=[];for(j=0;j<cnt.length;j++){if(cnt[j].replace(/[\s]/g,'')=='')continue;pfx=(!Math.floor(Math.random()*10))?'':prefixes[Math.floor(Math.random()*prefixes.length)];sfx=(!Math.floor(Math.random()*10))?'':suffixes[Math.floor(Math.random()*suffixes.length)];out.push(pfx+cnt[j]+sfx);}textNode.data='%20'+out.join('%20')+'%20';}})();)">Fauxgermanhausen das Pagen!</a>
+* Try this bookmarklet: <a href="javascript:(function(){var%20prefixes=['','glocken','das','borfa','maushe','uber'],suffixes=['','hausen','%20die%20vander','gleuten','noshan','flagellan','mek','dak','en%20das','ga'],xPathResult=document.evaluate('.//text()[normalize-space(.)!=\'\']',document.body,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null),i,textNode,cnt,out,j,pfx,sfx;for(i=0,l=xPathResult.snapshotLength;i<l;i++){textNode=xPathResult.snapshotItem(i);if(textNode.parentNode.nodeName.toLowerCase()=='script'||textNode.tagName=='style')continue;cnt=textNode.data.split(/\s/g);out=[];for(j=0;j<cnt.length;j++){if(cnt[j].replace(/[\s]/g,'')=='')continue;pfx=(!Math.floor(Math.random()*10))?'':prefixes[Math.floor(Math.random()*prefixes.length)];sfx=(!Math.floor(Math.random()*10))?'':suffixes[Math.floor(Math.random()*suffixes.length)];out.push(pfx+cnt[j]+sfx);}textNode.data='%20'+out.join('%20')+'%20';}})();)">Fauxgermanhausen das Pagen!</a>
 
-Database backed websites have already taught us to think about systematic design way, but designers may not be used to allowing for variable length labels or buttons.
-
-Overly "tight" or clever designs simply will not work in a localized context.
-
+Database-backed websites have already taught us to think about design in a systematic way, but designers may not be used to allowing for variable length labels or buttons.
 
 ## String Freeze
 
 Remember our build step to prepare files for localizers to translate?
-And in this post we learned about `po2json` for using these strings in our app...
+And in this post we learned about `po2json.js` for using these strings in our app...
 Well, this means we're going to need to coordinate our software releases with our L10n community.
 
 Continuous deployment isn't a solved problem with L10n. Either you have to block on getting 100%
@@ -250,13 +248,10 @@ Schedule this to happen during the QA cycle.
 
 Provide a live preview site, so that localizers can check their work.
 
-You should build a string freeze into your project schedule.
-
 ## Wrapping up
 
-In these three blog posts, we've seen how to develop a localized app with `i18n-abide`.
-How to add a L10n phase to our release build.
-And lastly, how to test our work.
+In these three blog posts, we've seen how to develop a localized app with `i18n-abide`,
+how to add a L10n phase to our release build, and lastly, how to test our work.
 
 Localizing your website or application will make your site valuable to an even larger global audience.
-Node.js hackers, go make your services accessible to a larger audience!
+Node.js hackers, go make your services accessible to the World!
