@@ -225,12 +225,12 @@ Another example is runtime data injected into your strings.
 We need to put our L10n hats on early.
 As early as when we review the initial graphic design of the website.
 
-Avoid putting text into images. Use CSS to keep words as plain text positioned over images.
+* Avoid putting text into images. Use CSS to keep words as plain text positioned over images.
 
-Make sure [CSS is bulletproof](http://simplebits.com/publications/bulletproof/). An English word in German can be many times larger and destroy a
+* Make sure [CSS is bulletproof](http://simplebits.com/publications/bulletproof/). An English word in German can be many times larger and destroy a
 poorly planned design.
 
-Try this bookmarklet: <a href="javascript:(function(){var%20prefixes=['','glocken','das','borfa','maushe','uber'],suffixes=['','hausen','%20die%20vander','gleuten','noshan','flagellan','mek','dak','en%20das','ga'],xPathResult=document.evaluate('.//text()[normalize-space(.)!=\'\']',document.body,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null),i,textNode,cnt,out,j,pfx,sfx;for(i=0,l=xPathResult.snapshotLength;i<l;i++){textNode=xPathResult.snapshotItem(i);if(textNode.parentNode.nodeName.toLowerCase()=='script'||textNode.tagName=='style')continue;cnt=textNode.data.split(/\s/g);out=[];for(j=0;j<cnt.length;j++){if(cnt[j].replace(/[\s]/g,'')=='')continue;pfx=(!Math.floor(Math.random()*10))?'':prefixes[Math.floor(Math.random()*prefixes.length)];sfx=(!Math.floor(Math.random()*10))?'':suffixes[Math.floor(Math.random()*suffixes.length)];out.push(pfx+cnt[j]+sfx);}textNode.data='%20'+out.join('%20')+'%20';}})();)">Fauxgermanhausen das Pagen!</a>
+* Try this bookmarklet: <a href="javascript:(function(){var%20prefixes=['','glocken','das','borfa','maushe','uber'],suffixes=['','hausen','%20die%20vander','gleuten','noshan','flagellan','mek','dak','en%20das','ga'],xPathResult=document.evaluate('.//text()[normalize-space(.)!=\'\']',document.body,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null),i,textNode,cnt,out,j,pfx,sfx;for(i=0,l=xPathResult.snapshotLength;i<l;i++){textNode=xPathResult.snapshotItem(i);if(textNode.parentNode.nodeName.toLowerCase()=='script'||textNode.tagName=='style')continue;cnt=textNode.data.split(/\s/g);out=[];for(j=0;j<cnt.length;j++){if(cnt[j].replace(/[\s]/g,'')=='')continue;pfx=(!Math.floor(Math.random()*10))?'':prefixes[Math.floor(Math.random()*prefixes.length)];sfx=(!Math.floor(Math.random()*10))?'':suffixes[Math.floor(Math.random()*suffixes.length)];out.push(pfx+cnt[j]+sfx);}textNode.data='%20'+out.join('%20')+'%20';}})();)">Fauxgermanhausen das Pagen!</a>
 
 Database backed websites have already taught us to think about systematic design way, but designers may not be used to allowing for variable length labels or buttons.
 
