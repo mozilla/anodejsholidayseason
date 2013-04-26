@@ -97,12 +97,10 @@ which would be converted into
           },
           "Mozilla Persona": [
              null,
-             ""
+             "Mozilla Personidada"
           ]
        }
     }
-
-[EDITOR NOTE - There is a bug in i18n-abide here, which I will fix.]
 
 So we can use these .json files server side form Node code, or client side by requesting them via AJAX.
 
