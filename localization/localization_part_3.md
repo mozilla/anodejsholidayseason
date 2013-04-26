@@ -132,7 +132,7 @@ It will look at `supported_languages` in the configuration to find the best lang
 
 You should only put languages in `supported_languages`, where you have a locale JSON file ready to go.
 
-## Start you engines
+## Start your engines
 
 Okay, now that configs are in place and we have at least one locale translated, let's fire it up!
 
