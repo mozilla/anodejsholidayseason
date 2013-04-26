@@ -250,9 +250,8 @@ Provide a live preview site, so that localizers can check their work.
 
 ## Wrapping up
 
-In these three blog posts, we've seen how to develop a localized app with `i18n-abide`.
-How to add a L10n phase to our release build.
-And lastly, how to test our work.
+In these three blog posts, we've seen how to develop a localized app with `i18n-abide`,
+how to add a L10n phase to our release build, and lastly, how to test our work.
 
 Localizing your website or application will make your site valuable to an even larger global audience.
 Node.js hackers, go make your services accessible to a larger audience!
