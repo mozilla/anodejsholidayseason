@@ -15,7 +15,7 @@ The next step is that we'll need your PO files, typically in a file system like 
       de
         LC_MESSAGES
           messages.po
-      el
+      es
         LC_MESSAGES
           messages.po
 
@@ -57,7 +57,7 @@ And we get a file structure like:
         de
           messages.json
           messages.js
-        el
+        es
           messages.json
           messages.js
 
@@ -104,7 +104,7 @@ which would be converted into
 
 So we can use these .json files server side form Node code, or client side by requesting them via AJAX.
 
-The `static` directory is exposed to web traffic, so a request to `/i18n/el/messages.json` would get the Greek JSON file.
+The `static` directory is exposed to web traffic, so a request to `/i18n/es/messages.json` would get the Spanish JSON file.
 
 This `static` directory is an express convention, you can store these files where ever you wish. You can serve up static files this via Node.js or a web server such as `nginx`.
 
@@ -117,12 +117,12 @@ This `static` directory is an express convention, you can store these files wher
 As we saw [in the first installment](https://hacks.mozilla.org/2013/04/localize-your-node-js-service-part-1-of-3-a-node-js-holiday-season-part-9/#language-detection), here is the required configuration for our application
 
     app.use(i18n.abide({
-      supported_languages: ['en-US', 'de', 'el', 'zh-TW'],
+      supported_languages: ['en-US', 'de', 'es', 'zh-TW'],
       default_lang: 'en-US',
       translation_directory: 'static/i18n'
     }));
 
-`supported_languages` tells the app that it supports English, German, Greek, Chinese (Traditional).
+`supported_languages` tells the app that it supports English, German, Spanish, Chinese (Traditional).
 The `translation_directory` config says that the translated JSON files are under static/i18n.
 Note that `translation_directory` is needed for **server side** gettext only.
 
@@ -144,7 +144,7 @@ In your web browser, change your preferred language to one which you have locali
 
 Now load a page for your application. You should see it translated now.
 
-Here is Mozilla Persona in **Greek**. So, cool!
+For a real world example, here is Mozilla Persona in **Greek**. So, cool!
 
 ![](dialog-greek.png)
 
@@ -158,7 +158,7 @@ To use it, just add `it-CH` or another locale you're not currently using to your
 Example *partial* config:
 
     app.use(i18n.abide({
-      supported_languages: ['en-US', 'de', 'el', 'zh-TW', 'it-CH'],
+      supported_languages: ['en-US', 'de', 'es', 'zh-TW', 'it-CH'],
       debug_lang: 'it-CH',
       ...
 
