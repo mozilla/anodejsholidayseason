@@ -126,7 +126,7 @@ As we saw [in the first installment](https://hacks.mozilla.org/2013/04/localize-
 The `translation_directory` config says that the translated JSON files are under static/i18n.
 Note that `translation_directory` is needed for **server side** gettext only.
 
-We explained in the first post that i18n-abide will do it's best to serve up an appropriate localized string.
+We explained in the first post that i18n-abide will do its best to serve up an appropriate localized string.
 
 It will look at `supported_languages` in the configuration to find the best language match.
 
