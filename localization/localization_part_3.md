@@ -254,4 +254,4 @@ In these three blog posts, we've seen how to develop a localized app with `i18n-
 how to add a L10n phase to our release build, and lastly, how to test our work.
 
 Localizing your website or application will make your site valuable to an even larger global audience.
-Node.js hackers, go make your services accessible to a larger audience!
+Node.js hackers, go make your services accessible to the World!
