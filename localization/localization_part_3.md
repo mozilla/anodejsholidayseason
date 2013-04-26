@@ -234,9 +234,6 @@ poorly planned design.
 
 Database-backed websites have already taught us to think about design in a systematic way, but designers may not be used to allowing for variable length labels or buttons.
 
-Overly "tight" or clever designs simply will not work in a localized context.
-
-
 ## String Freeze
 
 Remember our build step to prepare files for localizers to translate?
@@ -250,8 +247,6 @@ L10n teams may need 1, 2 or even 3 weeks to localize your app, depending on how 
 Schedule this to happen during the QA cycle.
 
 Provide a live preview site, so that localizers can check their work.
-
-You should build a string freeze into your project schedule.
 
 ## Wrapping up
 
