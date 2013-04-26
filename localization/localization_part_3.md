@@ -232,7 +232,7 @@ poorly planned design.
 
 * Try this bookmarklet: <a href="javascript:(function(){var%20prefixes=['','glocken','das','borfa','maushe','uber'],suffixes=['','hausen','%20die%20vander','gleuten','noshan','flagellan','mek','dak','en%20das','ga'],xPathResult=document.evaluate('.//text()[normalize-space(.)!=\'\']',document.body,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null),i,textNode,cnt,out,j,pfx,sfx;for(i=0,l=xPathResult.snapshotLength;i<l;i++){textNode=xPathResult.snapshotItem(i);if(textNode.parentNode.nodeName.toLowerCase()=='script'||textNode.tagName=='style')continue;cnt=textNode.data.split(/\s/g);out=[];for(j=0;j<cnt.length;j++){if(cnt[j].replace(/[\s]/g,'')=='')continue;pfx=(!Math.floor(Math.random()*10))?'':prefixes[Math.floor(Math.random()*prefixes.length)];sfx=(!Math.floor(Math.random()*10))?'':suffixes[Math.floor(Math.random()*suffixes.length)];out.push(pfx+cnt[j]+sfx);}textNode.data='%20'+out.join('%20')+'%20';}})();)">Fauxgermanhausen das Pagen!</a>
 
-Database backed websites have already taught us to think about design in a systematic way, but designers may not be used to allowing for variable length labels or buttons.
+Database-backed websites have already taught us to think about design in a systematic way, but designers may not be used to allowing for variable length labels or buttons.
 
 Overly "tight" or clever designs simply will not work in a localized context.
 
