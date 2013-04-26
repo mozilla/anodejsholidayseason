@@ -2,7 +2,7 @@
 
 ## Using Our Strings
 
-So [first we added the i18n-abide module to our code](https://hacks.mozilla.org/2013/04/localize-your-node-js-service-part-1-of-3-a-node-js-holiday-season-part-9/), then our [L10n team did some string wrangling](https://hacks.mozilla.org/2013/04/localization-community-tools-process-part-2-of-3-a-node-js-holiday-season-part-10/), now we've got several locales with translated strings...
+So [first we added the i18n-abide module to our code](https://hacks.mozilla.org/2013/04/localize-your-node-js-service-part-1-of-3-a-node-js-holiday-season-part-9/), then our [Localization (L10n) team did some string wrangling](https://hacks.mozilla.org/2013/04/localization-community-tools-process-part-2-of-3-a-node-js-holiday-season-part-10/), now we've got several locales with translated strings...
 
 Let's get these strings ready for Node.js and see this puppy in action!
 
