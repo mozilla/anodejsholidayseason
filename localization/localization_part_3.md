@@ -240,7 +240,7 @@ Overly "tight" or clever designs simply will not work in a localized context.
 ## String Freeze
 
 Remember our build step to prepare files for localizers to translate?
-And in this post we learned about `po2json` for using these strings in our app...
+And in this post we learned about `po2json.js` for using these strings in our app...
 Well, this means we're going to need to coordinate our software releases with our L10n community.
 
 Continuous deployment isn't a solved problem with L10n. Either you have to block on getting 100%
