@@ -193,8 +193,8 @@ You can use `format` to keep HTML in your strings to a minimum.
 Consider these three examples
 
     <%= gettext('<p>Buy <a href="/buy?prod=blue&tyep=ticket">Blue Tickets</a> Now!</p>') %>
-    <p><%= format(gettext('Buy <a href="%s">Blue Tickets</a> Now!', ['/buy?prod=blue&tyep=ticket'])) %></p>
-    <p><%= format(gettext('Buy <a href="%(url)s">Blue Tickets</a> Now!', {url: '/buy?prod=blue&tyep=ticket'})) %></p>
+    <p><%= format(gettext('Buy <a href="%s">Blue Tickets</a> Now!'), ['/buy?prod=blue&tyep=ticket']) %></p>
+    <p><%= format(gettext('Buy <a href="%(url)s">Blue Tickets</a> Now!'), {url: '/buy?prod=blue&tyep=ticket'}) %></p>
 
 In the PO file, they produce these strings:
 
