@@ -53,12 +53,15 @@ And we get a file structure like:
       i18n
         en
           messages.json
+          messages.js
         de
           messages.json
+          messages.js
         el
           messages.json
+          messages.js
 
-`compile-json` loops over each of our `.po` files and calls `po2json.js` on it, producing a `.json` file. `po2json.js` is another program provided by i18n-abide.
+`compile-json` loops over each of our `.po` files and calls `po2json.js` on it, producing `.json` and `.js` files. `po2json.js` is another program provided by i18n-abide.
 
 If we take the messages.po we have so far from these blog posts, we'd see:
 
