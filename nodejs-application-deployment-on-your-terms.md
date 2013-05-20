@@ -1,14 +1,12 @@
 # Introducing AWSBOX, the DiY PaaS for Node.JS
 
-Once you've written a server in Node.JS, how do you deploy it?  There are tens of "Platform As A Service" providers to choose from, or you can choose to build up your own hosting platform from an operating system image running on physical or virtual hardware.  Rather than enumerating the tradeoffs to consider, this post presents what we in the [Identity team at Mozilla][] have chosen for about 20 of the non-critical services we support.
+Once you've written a server in Node.js, how do you deploy it?
+Instead of using a pre-existing "Platform as a Service" (PaaS) provider, the [Identity team at Mozilla][] chose to build custom infrastructure atop [Amazon EC2][], and we'd like to tell you more about it.
 
-Meet [awsbox][], a minimalistic "platform as a service" (PaaS) layer for Node.JS applications built on top of [Amazon EC2][].  The project was built with three main goals in mind:
+Meet [awsbox][], a minimalist PaaS layer for Node.js applications that's currently handling nearly two dozen of the non-critical services that we support.
+Awsbox was designed to deliver simple, PaaS-style deployment without sacrificing the flexibility of custom infrastructure.
 
-1. 
-2.
-3.
-
-[Identity Team At Mozilla]: https://identity.mozilla.com/
+[Identity team at Mozilla]: https://identity.mozilla.com/
 [awsbox]: https://github.com/mozilla/awsbox
 [Amazon EC2]: http://aws.amazon.com/ec2/
 
