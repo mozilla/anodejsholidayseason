@@ -16,7 +16,10 @@ In order to deploy a Node.JS project with awsbox, you must make some tiny change
 
 In terms of app changes, you must:
 
-1. Create an `.awsbox.json` file that specifies how to start the server
+1. Create an `.awsbox.json` file that specifies how to start the server.  At its simplest, the file may look like this:
+    {
+      "processes": [ "path/to/myprocess.js" ]
+    }
 2. add `awsbox` as a dependency in your `package.json`
 3. ensure your server binds to the port specified in the `PORT` environment variable
 
