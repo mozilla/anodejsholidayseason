@@ -2,7 +2,11 @@
 
 Once you've written a server in Node.JS, how do you deploy it?  There are tens of "Platform As A Service" providers to choose from, or you can choose to build up your own hosting platform from an operating system image running on physical or virtual hardware.  Rather than enumerating the tradeoffs to consider, this post presents what we in the [Identity team at Mozilla][] have chosen for about 20 of the non-critical services we support.
 
-Meet [awsbox][], a minimalistic "platform as a service" layer for Node.JS applications built on top of [Amazon EC2][].  The project is open source and consists of a machine image pre-configured to run Node.JS applications, and a command line interface for server creation and management.
+Meet [awsbox][], a minimalistic "platform as a service" (PaaS) layer for Node.JS applications built on top of [Amazon EC2][].  The project was built with three main goals in mind:
+
+1. 
+2.
+3.
 
 [Identity Team At Mozilla]: https://identity.mozilla.com/
 [awsbox]: https://github.com/mozilla/awsbox
@@ -54,25 +58,35 @@ And now your Node.JS application is hosted and running on an EC2 instance.  At t
 
 Now that you have a feel for how you use awsbox and the basic features it provides, let's take a step back and look at what it actually is and how it works.
 
-## AWSBOX is ... A Minimalistic Contract
+## awsbox is ... A Minimalistic Contract
 
-Any hosting environment has certain expectations of the application that it will be running, the contract.  For awsbox this contract includes the following from an app:
+Any hosting environment has certain expectations of the application that it will be running, *the contract*.  For awsbox this contract includes the following:
 
-**What process(es) should be run** are specified in `.awsbox.json`.
+**What process(es) should be run** are specified by the app in `.awsbox.json`.
 
-**What software must be installed** is specified in `package.json`. 
+**What software must be installed** is specified by the app in `package.json`. 
 
-**On which port do I communicate with the application** is communicated via the `PORT` environment variable.
+**On which port do I communicate with the application** is communicated to the app via the `PORT` environment variable.
+
+In building awsbox, a main goal was minimal invention, to make it easy to "port" an existing application to awsbox.
+
+## awsbox is ... A Machine Image
+
+During the process of creating an instance, awsbox creates a machine instance from an "Amazon Machine Image", which results in a running server that's ready to accept your node.js application and install it.  The ID of the machine image is referenced in the `awsbox` javascript library.  
+
+This image is *pre-configured with multiple user accounts*.  `ec2-user` is an account that has sudo access to the machine.  `proxy` is an account that hosts an [HTTP reverse proxy][] that with a [few steps][] can serve as an SSL server to let you support HTTPS without modifying your application.  Finally, the `app` user is the account that hosts all of your application code, your server logs, the server based git repository that you push to, and the [git post-commit hook][] responsible for installing dependencies and starting your server after you push.
+
+[HTTP reverse proxy]: http://en.wikipedia.org/wiki/Reverse_proxy
+[few steps]: https://github.com/mozilla/awsbox/blob/master/doc/HOW_DO_I.md#how-do-i-enable-ssl
+[git post-commit hook]: https://www.kernel.org/pub/software/scm/git/docs/githooks.html
+
+## awsbox is ... Command Line Tools and Libraries
 
 
 
-## AWSBOX is ... A Machine Image
+## awsbox is ... A Pile Of Features and Hooks
 
-## AWSBOX is ... Command Line Tools and Libraries
-
-## AWSBOX is ... A Pile Of Features and Hooks
-
-# Is AWSBOX for Me?
+# Is awsbox for Me?
 
 XXX:  Let's reel it back in and keep it real.  This is a solution that's
 XXX:  Worked fantastic for our team, how else could a handful of folks
