@@ -15,12 +15,15 @@ XXX: What do we actually want out of a PaaS
 
 XXX: Hypothesis: PaaS in its ideal form is awesome for alpha & beta.
 
-# Introducing AWSBOX, the DiY PaaS for Node.JS Built on AWS
+# Introducing AWSBOX, the DiY PaaS for Node.JS
 
 XXX: In the identity team, after trying several popular PaaS providers,
+
 XXX: we decided to roll our own.  This is how you use it, 1-2-3
 
-## AWSBOX is ... A Minimalistic Contract between App and Environment
+## AWSBOX is ... A Minimalistic Contract
+
+XXX contract be
 
 ## AWSBOX is ... A Machine Image
 
@@ -35,10 +38,3 @@ XXX:  Worked fantastic for our team, how else could a handful of folks
 XXX:  support 20 distinct alpha/beta services?
 
 XXX:  the bottom line is...
-
-
-
-
-
-
-
