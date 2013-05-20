@@ -20,7 +20,7 @@ In terms of app changes, you must:
 2. add `awsbox` as a dependency in your `package.json`
 3. ensure your server binds to the port specified in the `PORT` environment variable
 
-To provide your amazon credentials, you must set `AWS_ID` and `AWS_SECRET` in your environment, two values which you can attain through the [amazon management console][].
+To provide your amazon credentials, you must set `AWS_ID` and `AWS_SECRET` in your environment, two values which you can obtain through the [amazon management console][].
 
 [amazon management console]: http://aws.amazon.com/console/
 
@@ -50,7 +50,7 @@ The final step to deploy your application is to `git push`:
 
     $ git push MyFirstAWSBOX HEAD:master
 
-And now your Node.JS application is hosted and running on an EC2 instance.  At this point, you've spend about twenty minutes with awsbox.  You've made minimal changes to your application.  You've deployed a new server and gotten your application up and running in EC2.  Finally, you've got an easy way to push changes that fits within your existing workflow (you just git push to a remote).
+And now your Node.JS application is hosted and running on an EC2 instance.  At this point, you've spent about twenty minutes with awsbox.  You've made minimal changes to your application.  You've deployed a new server and gotten your application up and running in EC2.  Finally, you've got an easy way to push changes that fits within your existing workflow (you just `git push` to a remote).
 
 Now that you have a feel for how you use awsbox and the basic features it provides, let's take a step back and look at what it actually is and how it works.
 
